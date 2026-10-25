@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f4e8c">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Letterhead Writer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Noto+Serif:wght@400;700&family=Noto+Serif+Devanagari:wght@400;700&family=Noto+Serif+Gujarati:wght@400;700&display=swap">
+<style>
+/* Layout: one narrow phone column, one screen at a time (Write, Check and send, Settings), with a fixed bottom bar holding the next action. */
+:root {
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --ink: #17233a;
+  --muted: #5a6577;
+  --line: #cfd6e0;
+  --accent: #1f4e8c;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2eaf6;
+  --ok: #1d6b45;
+  --warn: #9a4b0b;
+  --warn-soft: #fbeedd;
+  --paper-shadow: 0 1px 2px rgba(23,35,58,.12), 0 8px 24px rgba(23,35,58,.10);
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-letter: "Noto Serif", "Noto Serif Devanagari", "Noto Serif Gujarati", Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111722; --surface: #1a2230; --ink: #e6ebf3; --muted: #9aa5b6; --line: #33405a;
+  --accent: #7fa8e6; --accent-ink: #0d1420; --accent-soft: #22324a; --ok: #6fcf9a; --warn: #f0a65e; --warn-soft: #3a2a18;
+  --paper-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111722; --surface: #1a2230; --ink: #e6ebf3; --muted: #9aa5b6; --line: #33405a;
+  --accent: #7fa8e6; --accent-ink: #0d1420; --accent-soft: #22324a; --ok: #6fcf9a; --warn: #f0a65e; --warn-soft: #3a2a18;
+  --paper-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark }
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
+.wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 130px; display: flex; flex-direction: column; gap: 16px; }
+
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; }
+h1 { font-family: var(--f-display); font-size: 1.45rem; margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+.iconbtn { min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: .95rem; font-weight: 700; cursor: pointer; }
+
+.banner { background: var(--warn-soft); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.banner p { margin: 0; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span { font-weight: 700; font-size: 1rem; }
+.field small { color: var(--muted); font-size: .88rem; }
+input[type=text], input[type=date], textarea {
+  font: inherit; font-size: 17px; color: var(--ink); background: var(--surface);
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; width: 100%; min-height: 52px; }
+textarea { min-height: 46vh; resize: vertical; line-height: 1.6; font-family: var(--f-letter); font-size: 17px; }
+textarea::placeholder, input::placeholder { color: var(--muted); opacity: .8; }
+input:focus-visible, textarea:focus-visible, button:focus-visible, summary:focus-visible, .tile:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+details.more { background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; }
+details.more summary { list-style: none; cursor: pointer; padding: 14px 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; min-height: 52px; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::after { content: "+"; font-size: 1.4rem; color: var(--accent); line-height: 1; }
+details.more[open] summary::after { content: "–"; }
+details.more .inner { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+
+.tile { position: relative; background: var(--surface); border: 2px dashed var(--line); border-radius: 14px; padding: 14px; display: grid; grid-template-columns: 96px minmax(0,1fr); gap: 14px; align-items: center; min-height: 100px; }
+.tile.done { border-style: solid; border-color: var(--ok); }
+.tile input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.tile .thumb { width: 96px; height: 72px; border-radius: 8px; background: var(--bg) center/contain no-repeat; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); font-size: 1.6rem; }
+.tile .t { font-weight: 700; font-size: 1.05rem; }
+.tile .s { color: var(--muted); font-size: .9rem; }
+.tile.done .s { color: var(--ok); font-weight: 700; }
+
+.sectionlab { font-weight: 700; font-size: 1.05rem; }
+.signer { background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.signer .tile { background: var(--bg); }
+.signer .danger { padding: 4px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { position: relative; display: inline-flex; align-items: center; min-height: 48px; padding: 10px 16px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font-weight: 700; cursor: pointer; max-width: 100%; }
+.chip input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.chip:has(input:checked) { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.chip .x { font-weight: 400; font-size: .85rem; margin-left: 6px; opacity: .85; }
+.slider { display: flex; flex-direction: column; gap: 4px; }
+.slider .lab { display: flex; justify-content: space-between; font-size: .95rem; }
+.slider output { font-variant-numeric: tabular-nums; color: var(--muted); }
+input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
+
+.pages { display: flex; flex-direction: column; gap: 14px; }
+.pages canvas { width: 100%; height: auto; display: block; background: #fff; box-shadow: var(--paper-shadow); border-radius: 3px; }
+.pagelabel { font-size: .85rem; color: var(--muted); text-align: center; margin-top: -6px; }
+.tag { align-self: flex-start; background: var(--warn-soft); color: var(--warn); font-weight: 700; font-size: .85rem; padding: 4px 10px; border-radius: 999px; }
+.hint { color: var(--muted); font-size: .92rem; margin: 0; }
+.danger { background: none; border: none; color: var(--warn); font: inherit; font-weight: 700; text-decoration: underline; padding: 10px 0; cursor: pointer; align-self: flex-start; }
+
+.dock { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); z-index: 5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: 10px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+.dock .in { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.dock .msg { font-size: .92rem; color: var(--muted); text-align: center; min-height: 1.2em; }
+.dock .msg.ok { color: var(--ok); font-weight: 700; } .dock .msg.err { color: var(--warn); font-weight: 700; }
+.dock .btns { display: flex; gap: 10px; }
+.btn { flex: 1 1 0; min-height: 56px; border-radius: 14px; font: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 14px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); flex-grow: 2; }
+.btn:disabled { opacity: .55; cursor: wait; }
+@media (prefers-reduced-motion: no-preference) { .view { animation: in .18s ease-out; } @keyframes in { from { transform: translateY(6px); } to { transform: none; } } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <!-- WRITE -->
+  <div class="view" id="vWrite">
+    <div class="bar"><h1>New letter</h1><button class="iconbtn" type="button" id="toSettings">Settings</button></div>
+    <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">
+      <div class="banner" id="setupBanner" hidden>
+        <p><strong>First time?</strong> Add the school letterhead and the HM's signature. It takes a minute and is saved on this phone.</p>
+        <button class="btn primary" type="button" id="bannerBtn" style="flex:none">Add letterhead and signature</button>
+      </div>
+      <label class="field"><span>Subject</span><input type="text" id="subject" placeholder="e.g. Diwali holidays"></label>
+      <label class="field"><span>Letter</span>
+        <textarea id="body" placeholder="Type the letter here. Leave an empty line between paragraphs.&#10;&#10;Hindi, Marathi and Gujarati typing works too."></textarea>
+      </label>
+      <div class="field"><span>Signed by</span>
+        <div class="chips" id="signedBy"></div>
+        <small>Tap a name to choose. Choose more than one for a joint letter.</small>
+      </div>
+      <details class="more">
+        <summary>Date, greeting and more</summary>
+        <div class="inner">
+          <label class="field"><span>Date</span><input type="date" id="date"></label>
+          <label class="field"><span>Greeting</span><input type="text" id="greet" value="Dear Parents,"></label>
+          <label class="field"><span>Closing</span><input type="text" id="close" value="Yours sincerely,"></label>
+          <label class="field"><span>Ref. no.</span><input type="text" id="ref" placeholder="Leave empty if not needed"></label>
+        </div>
+      </details>
+      <button class="danger" type="button" id="newLetter">Clear and start a new letter</button>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="view" id="vPreview" hidden>
+    <div class="bar"><h1>Check the letter</h1></div>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px">
+      <span class="tag" id="sampleTag" hidden>Sample letter. Type your own on the previous screen.</span>
+      <div class="pages" id="pages"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="view" id="vSettings" hidden>
+    <div class="bar"><h1>Letterhead and signature</h1></div>
+    <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">
+      <p class="hint">Do this once. Tap a box to choose a photo or file.</p>
+      <div class="tile" id="lhTile">
+        <div class="thumb" id="lhThumb">+</div>
+        <div><div class="t">1. School letterhead</div><div class="s" id="lhSt">A photo, scan or PDF of a blank letterhead</div></div>
+        <input type="file" id="lhFile" accept="image/*,application/pdf" aria-label="Choose school letterhead">
+      </div>
+      <div class="sectionlab">2. People who sign letters</div>
+      <p class="hint" style="margin-top:-8px">Add each person once, with a photo of their signature on plain white paper.</p>
+      <div id="signerList" style="display:flex;flex-direction:column;gap:14px"></div>
+      <button class="btn" type="button" id="addSigner" style="flex:none">+ Add another person</button>
+      <details class="more">
+        <summary>Text overlaps the letterhead?</summary>
+        <div class="inner">
+          <p class="hint">Move these until the letter sits clear of the header and footer. Check on the preview.</p>
+          <div class="slider"><div class="lab"><span>Space at top</span><output id="oTop">55 mm</output></div><input type="range" id="mTop" min="15" max="110" step="1" value="55"></div>
+          <div class="slider"><div class="lab"><span>Space at bottom</span><output id="oBot">30 mm</output></div><input type="range" id="mBot" min="10" max="80" step="1" value="30"></div>
+          <div class="slider"><div class="lab"><span>Side margins</span><output id="oSide">20 mm</output></div><input type="range" id="mSide" min="12" max="35" step="1" value="20"></div>
+          <div class="slider"><div class="lab"><span>Text size</span><output id="oSize">11.5 pt</output></div><input type="range" id="fSize" min="10" max="14" step="0.5" value="11.5"></div>
+        </div>
+      </details>
+      <button class="danger" type="button" id="clearSetup">Remove saved letterhead and signature</button>
+    </div>
+  </div>
+</div>
+
+<div class="dock">
+  <div class="in">
+    <div class="msg" id="msg"></div>
+    <div class="btns" id="dockWrite"><button class="btn primary" type="button" id="goPreview">Next: check letter</button></div>
+    <div class="btns" id="dockPreview" hidden><button class="btn" type="button" id="backEdit">Edit</button><button class="btn primary" type="button" id="sendBtn">Share PDF</button></div>
+    <div class="btns" id="dockSettings" hidden><button class="btn primary" type="button" id="doneSettings">Done</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const DPI = 200, MM = DPI / 25.4, PW = Math.round(210 * MM), PH = Math.round(297 * MM);
+  const SERIF = '"Noto Serif", "Noto Serif Devanagari", "Noto Serif Gujarati", Georgia, serif';
+  const store = {
+    get(k) { try { return localStorage.getItem("lhw:" + k); } catch (e) { return null; } },
+    set(k, v) { try { if (v == null) localStorage.removeItem("lhw:" + k); else localStorage.setItem("lhw:" + k, v); return true; } catch (e) { return false; } }
+  };
+  const SAMPLE = {
+    subject: "Parent-Teacher Meeting, Saturday 7 November 2026",
+    body: "We are pleased to invite you to the Parent-Teacher Meeting for Terms I and II, to be held on Saturday, 7 November 2026, from 9:00 a.m. to 12:30 p.m. in the respective classrooms.\n\nClass teachers will share your child's progress report and discuss areas for improvement. We request that at least one parent attends.\n\nKindly note that the school gate will close at 12:15 p.m.\n\nWe look forward to meeting you."
+  };
+  let lhImg = null, lhIsStrip = false;
+  let signers = [], signedBy = [];
+  const sigImgs = new Map();
+
+  // ---------- screens ----------
+  let view = "write";
+  function show(v) {
+    view = v;
+    $("vWrite").hidden = v !== "write"; $("vPreview").hidden = v !== "preview"; $("vSettings").hidden = v !== "settings";
+    $("dockWrite").hidden = v !== "write"; $("dockPreview").hidden = v !== "preview"; $("dockSettings").hidden = v !== "settings";
+    note("");
+    window.scrollTo(0, 0);
+    if (v === "preview") render();
+    if (v === "write") { $("setupBanner").hidden = !!(lhImg && signers.some((s) => s.sig)); renderChips(); }
+    if (v === "settings") renderSigners();
+  }
+  $("toSettings").addEventListener("click", () => show("settings"));
+  $("bannerBtn").addEventListener("click", () => show("settings"));
+  $("doneSettings").addEventListener("click", () => show("write"));
+  $("goPreview").addEventListener("click", () => show("preview"));
+  $("backEdit").addEventListener("click", () => show("write"));
+
+  // ---------- images ----------
+  function loadImage(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+  async function fileToImage(file) { const url = URL.createObjectURL(file); try { return await loadImage(url); } finally { setTimeout(() => URL.revokeObjectURL(url), 2000); } }
+  let pdfjsLoading = null;
+  function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (!pdfjsLoading) pdfjsLoading = new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      s.onload = () => { const p = window.pdfjsLib; p.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; res(p); };
+      s.onerror = rej; document.head.appendChild(s);
+    });
+    return pdfjsLoading;
+  }
+  async function pdfToImage(file) {
+    const pdfjs = await loadPdfJs();
+    const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+    const page = await doc.getPage(1);
+    const v1 = page.getViewport({ scale: 1 }), vp = page.getViewport({ scale: PW / v1.width });
+    const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    return loadImage(c.toDataURL("image/jpeg", 0.9));
+  }
+  function downscale(img, maxW) {
+    const s = Math.min(1, maxW / img.naturalWidth), c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+    const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", 0.85);
+  }
+  // Paper becomes transparent, ink gets darker, and the picture is cropped to the signature.
+  function cleanSignature(img) {
+    const s = Math.min(1, 900 / img.naturalWidth), w = Math.round(img.naturalWidth * s), h = Math.round(img.naturalHeight * s);
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
+    const d = ctx.getImageData(0, 0, w, h), p = d.data;
+    let sum = 0; for (let i = 0; i < p.length; i += 4) sum += (p[i] + p[i+1] + p[i+2]) / 3;
+    const cut = (sum / (p.length / 4)) * 0.78;
+    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4, lum = (p[i] + p[i+1] + p[i+2]) / 3;
+      if (lum > cut) { p[i+3] = 0; continue; }
+      p[i+3] = Math.round(255 * Math.min(1, (cut - lum) / (cut * 0.45)));
+      p[i] = Math.round(p[i] * 0.55); p[i+1] = Math.round(p[i+1] * 0.55); p[i+2] = Math.round(p[i+2] * 0.65);
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+    }
+    ctx.putImageData(d, 0, 0);
+    if (x1 < 0) return c.toDataURL("image/png");
+    const pad = 6; x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(w - 1, x1 + pad); y1 = Math.min(h - 1, y1 + pad);
+    const o = document.createElement("canvas"); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
+    o.getContext("2d").drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+    return o.toDataURL("image/png");
+  }
+  function setTile(prefix, dataUrl, okText, emptyText) {
+    const th = $(prefix + "Thumb");
+    th.style.backgroundImage = dataUrl ? "url(" + dataUrl + ")" : ""; th.textContent = dataUrl ? "" : "+";
+    $(prefix + "St").textContent = dataUrl ? okText : emptyText;
+    $(prefix + "Tile").classList.toggle("done", !!dataUrl);
+  }
+  async function setLetterhead(dataUrl, save) {
+    lhImg = dataUrl ? await loadImage(dataUrl) : null;
+    lhIsStrip = lhImg ? (lhImg.naturalHeight / lhImg.naturalWidth) < 0.8 : false;
+    setTile("lh", dataUrl, "Saved. Tap to change", "A photo, scan or PDF of a blank letterhead");
+    if (save && !store.set("lh", dataUrl)) note("Letterhead added, but this browser could not save it for next time.", "err");
+  }
+  // ---------- signers ----------
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  const signerLabel = (s, i) => s.name.trim() || "Person " + (i + 1);
+  function saveSigners() {
+    if (!store.set("signers", JSON.stringify(signers))) note("Could not save this on this browser.", "err");
+    store.set("signedBy", JSON.stringify(signedBy));
+  }
+  async function loadSigImg(s) { if (s.sig) sigImgs.set(s.id, await loadImage(s.sig)); else sigImgs.delete(s.id); }
+  function newSigner(role) { return { id: uid(), name: "", role: role || "", sig: null }; }
+
+  function renderSigners() {
+    const host = $("signerList"); host.innerHTML = "";
+    signers.forEach((s, i) => {
+      const card = document.createElement("div"); card.className = "signer";
+      const tile = document.createElement("div"); tile.className = "tile" + (s.sig ? " done" : "");
+      const th = document.createElement("div"); th.className = "thumb";
+      th.style.backgroundImage = s.sig ? "url(" + s.sig + ")" : ""; th.textContent = s.sig ? "" : "+";
+      const txt = document.createElement("div");
+      const t = document.createElement("div"); t.className = "t"; t.textContent = "Signature";
+      const st = document.createElement("div"); st.className = "s"; st.textContent = s.sig ? "Saved. Tap to change" : "Photo of the signature on white paper";
+      txt.append(t, st);
+      const fi = document.createElement("input"); fi.type = "file"; fi.accept = "image/*"; fi.id = "sigFile-" + s.id;
+      fi.setAttribute("aria-label", "Choose signature photo for " + signerLabel(s, i));
+      fi.addEventListener("change", async () => {
+        const f = fi.files[0]; if (!f) return;
+        st.textContent = "Cleaning up the photo…";
+        try {
+          s.sig = cleanSignature(await fileToImage(f)); await loadSigImg(s);
+          if (!signedBy.length) signedBy = [s.id];
+          saveSigners();
+          tile.classList.add("done"); th.style.backgroundImage = "url(" + s.sig + ")"; th.textContent = ""; st.textContent = "Saved. Tap to change";
+        } catch (e) { st.textContent = "Could not read this photo. Try another one."; }
+        fi.value = "";
+      });
+      tile.append(th, txt, fi);
+      const mk = (label, key, ph) => {
+        const l = document.createElement("label"); l.className = "field";
+        const sp = document.createElement("span"); sp.textContent = label;
+        const inp = document.createElement("input"); inp.type = "text"; inp.id = key + "-" + s.id; inp.value = s[key]; inp.placeholder = ph;
+        inp.addEventListener("input", () => { s[key] = inp.value; saveSigners(); });
+        l.append(sp, inp); return l;
+      };
+      card.append(tile, mk("Name", "name", "e.g. Mrs A. Mehta"), mk("Designation", "role", "e.g. Headmistress"));
+      if (signers.length > 1) {
+        const rm = document.createElement("button"); rm.type = "button"; rm.className = "danger"; rm.textContent = "Remove this person";
+        let armed = false;
+        rm.addEventListener("click", () => {
+          if (!armed) { armed = true; rm.textContent = "Tap again to remove"; setTimeout(() => { armed = false; rm.textContent = "Remove this person"; }, 4000); return; }
+          signers = signers.filter((x) => x.id !== s.id); signedBy = signedBy.filter((x) => x !== s.id); sigImgs.delete(s.id);
+          saveSigners(); renderSigners();
+        });
+        card.append(rm);
+      }
+      host.append(card);
+    });
+  }
+  $("addSigner").addEventListener("click", () => {
+    signers.push(newSigner()); saveSigners(); renderSigners();
+    const last = $("signerList").lastElementChild; if (last) { last.scrollIntoView({ block: "center" }); const n = last.querySelector('input[type="text"]'); if (n) n.focus(); }
+  });
+
+  function renderChips() {
+    const host = $("signedBy"); host.innerHTML = "";
+    signers.forEach((s, i) => {
+      const l = document.createElement("label"); l.className = "chip";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = "chip-" + s.id; cb.checked = signedBy.includes(s.id);
+      const sp = document.createElement("span"); sp.textContent = signerLabel(s, i);
+      l.append(cb, sp);
+      if (!s.sig) { const x = document.createElement("span"); x.className = "x"; x.textContent = "(no signature yet)"; l.append(x); }
+      cb.addEventListener("change", () => {
+        const set = new Set(signedBy); if (cb.checked) set.add(s.id); else set.delete(s.id);
+        signedBy = signers.map((p) => p.id).filter((id) => set.has(id)); saveSigners();
+      });
+      host.append(l);
+    });
+  }
+  $("lhFile").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    $("lhSt").textContent = "Reading…";
+    try {
+      const img = (f.type === "application/pdf" || /\.pdf$/i.test(f.name)) ? await pdfToImage(f) : await fileToImage(f);
+      await setLetterhead(downscale(img, PW), true);
+      if (lhIsStrip) setSlider("mTop", Math.min(110, Math.max(15, Math.round(210 * img.naturalHeight / img.naturalWidth) + 8)));
+    } catch (err) { $("lhSt").textContent = "Could not read this file. Try a JPG or PNG photo of the letterhead."; }
+    e.target.value = "";
+  });
+  let clearArmed = false;
+  $("clearSetup").addEventListener("click", async () => {
+    if (!clearArmed) { clearArmed = true; $("clearSetup").textContent = "Tap again to remove them"; setTimeout(() => { clearArmed = false; $("clearSetup").textContent = "Remove saved letterhead and signature"; }, 4000); return; }
+    clearArmed = false; $("clearSetup").textContent = "Remove saved letterhead and signature";
+    await setLetterhead(null, true);
+    sigImgs.clear(); signers = [newSigner("Headmistress")]; signedBy = [signers[0].id]; saveSigners(); renderSigners();
+  });
+
+  // ---------- fields ----------
+  const fields = ["date", "ref", "subject", "greet", "body", "close"];
+  const sliders = { mTop: ["oTop", " mm"], mBot: ["oBot", " mm"], mSide: ["oSide", " mm"], fSize: ["oSize", " pt"] };
+  function setSlider(id, v) { $(id).value = v; $(sliders[id][0]).textContent = $(id).value + sliders[id][1]; store.set(id, String($(id).value)); }
+  function today() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+  function fmtDate(iso) {
+    if (!iso) return ""; const [y, m, d] = iso.split("-").map(Number);
+    return d + " " + ["January","February","March","April","May","June","July","August","September","October","November","December"][m-1] + " " + y;
+  }
+  for (const k of fields) $(k).addEventListener("input", () => store.set("f:" + k, $(k).value));
+  for (const id in sliders) $(id).addEventListener("input", () => setSlider(id, $(id).value));
+  let newArmed = false;
+  $("newLetter").addEventListener("click", () => {
+    if (!newArmed) { newArmed = true; $("newLetter").textContent = "Tap again to clear the letter"; setTimeout(() => { newArmed = false; $("newLetter").textContent = "Clear and start a new letter"; }, 4000); return; }
+    newArmed = false; $("newLetter").textContent = "Clear and start a new letter";
+    for (const k of ["ref", "subject", "body"]) { $(k).value = ""; store.set("f:" + k, null); }
+    $("date").value = today(); store.set("f:date", null); $("subject").focus();
+  });
+
+  // ---------- drawing ----------
+  const isSample = () => !$("body").value.trim();
+  const val = (id) => (id === "subject" || id === "body") && isSample() ? SAMPLE[id] : $(id).value;
+  function font(px, bold) { return (bold ? "700 " : "400 ") + px + "px " + SERIF; }
+  function wrap(ctx, text, maxW) {
+    const out = [];
+    for (const para of text.split("\n")) {
+      if (!para.trim()) { out.push(""); continue; }
+      let line = "";
+      for (const w of para.split(/(\s+)/).filter(Boolean)) {
+        const test = line + w;
+        if (ctx.measureText(test).width <= maxW) { line = test; continue; }
+        if (/^\s+$/.test(w)) { out.push(line.trimEnd()); line = ""; continue; }
+        if (line.trim()) out.push(line.trimEnd());
+        line = "";
+        let chunk = "";
+        for (const ch of Array.from(w)) { if (ctx.measureText(chunk + ch).width > maxW && chunk) { out.push(chunk); chunk = ch; } else chunk += ch; }
+        line = chunk;
+      }
+      out.push(line.trimEnd());
+    }
+    return out;
+  }
+  function drawBackground(ctx) {
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, PW, PH);
+    if (lhImg) { if (lhIsStrip) ctx.drawImage(lhImg, 0, 0, PW, PW * lhImg.naturalHeight / lhImg.naturalWidth); else ctx.drawImage(lhImg, 0, 0, PW, PH); return; }
+    const top = 38 * MM;
+    ctx.fillStyle = "#f3f5f9"; ctx.fillRect(0, 0, PW, top);
+    ctx.fillStyle = "#1f4e8c"; ctx.fillRect(0, top - 1.2 * MM, PW, 1.2 * MM);
+    ctx.textAlign = "center"; ctx.font = font(Math.round(7 * MM), true); ctx.fillText("Your school letterhead goes here", PW / 2, 20 * MM);
+    ctx.fillStyle = "#6b778a"; ctx.font = font(Math.round(3.6 * MM), false); ctx.fillText("Add it in Settings and it replaces this band", PW / 2, 28 * MM);
+    ctx.textAlign = "left";
+  }
+  function layout() {
+    const m = { top: +$("mTop").value * MM, bot: +$("mBot").value * MM, side: +$("mSide").value * MM };
+    const fs = Math.round(+$("fSize").value * DPI / 72), lh = Math.round(fs * 1.5), maxW = PW - 2 * m.side;
+    const meas = document.createElement("canvas").getContext("2d");
+    const text = (ctx, s, x, y, bold, align) => { ctx.font = font(fs, bold); ctx.fillStyle = "#111"; ctx.textAlign = align || "left"; ctx.fillText(s, x, y + fs); ctx.textAlign = "left"; };
+    const blocks = [];
+    const ref = $("ref").value.trim(), dateTxt = fmtDate($("date").value || today());
+    blocks.push({ h: lh * 2, draw(ctx, y) { if (ref) text(ctx, "Ref: " + ref, m.side, y); text(ctx, dateTxt, PW - m.side, y, false, "right"); } });
+    const subj = val("subject").trim();
+    if (subj) { meas.font = font(fs, true); const ls = wrap(meas, "Subject: " + subj, maxW); ls.forEach((ln, i) => blocks.push({ h: lh + (i === ls.length - 1 ? lh * 0.6 : 0), draw(ctx, y) { text(ctx, ln, m.side, y, true); } })); }
+    const greet = $("greet").value.trim();
+    if (greet) blocks.push({ h: lh * 1.6, draw(ctx, y) { text(ctx, greet, m.side, y); } });
+    meas.font = font(fs, false);
+    for (const ln of wrap(meas, val("body").replace(/\n{3,}/g, "\n\n").trim(), maxW)) blocks.push({ h: ln ? lh : lh * 0.6, draw(ctx, y) { if (ln) text(ctx, ln, m.side, y); } });
+    // Signature block: one column per signer, up to three per row, kept together on one page
+    const sigH = 22 * MM, closeTxt = $("close").value.trim();
+    const chosen = signers.filter((s) => signedBy.includes(s.id));
+    const perRow = Math.min(3, Math.max(1, chosen.length)), colW = maxW / perRow;
+    const anyRole = chosen.some((s) => s.role.trim());
+    const rowH = sigH + lh + (anyRole ? lh : 0) + lh * 0.6;
+    const nRows = Math.ceil(chosen.length / perRow);
+    blocks.push({ h: lh * 1.2 + (closeTxt ? lh : 0) + (chosen.length ? nRows * rowH : lh * 2.2), draw(ctx, y) {
+      let yy = y + lh * 1.2;
+      if (closeTxt) { text(ctx, closeTxt, m.side, yy); yy += lh; }
+      chosen.forEach((s, i) => {
+        const col = i % perRow, row = Math.floor(i / perRow);
+        const x = m.side + col * colW, top = yy + row * rowH, img = sigImgs.get(s.id);
+        if (img) {
+          const boxH = sigH - 3 * MM, boxW = Math.min(60 * MM, colW - 6 * MM), r = img.naturalWidth / img.naturalHeight;
+          let h = boxH, w = h * r; if (w > boxW) { w = boxW; h = w / r; }
+          ctx.drawImage(img, x, top + 2 * MM + (boxH - h), w, h);
+        }
+        ctx.font = font(fs, true); const nmLine = wrap(ctx, s.name.trim(), colW - 4 * MM)[0] || "";
+        ctx.font = font(fs, false); const roleLine = wrap(ctx, s.role.trim(), colW - 4 * MM)[0] || "";
+        if (nmLine) text(ctx, nmLine, x, top + sigH, true);
+        if (roleLine) text(ctx, roleLine, x, top + sigH + lh);
+      });
+    }});
+    const pages = [[]]; let y = m.top; const limit = PH - m.bot;
+    for (const b of blocks) { if (y + b.h > limit && pages[pages.length - 1].length) { pages.push([]); y = m.top; } pages[pages.length - 1].push({ b, y }); y += b.h; }
+    return pages;
+  }
+  async function fontsReady() {
+    try { await Promise.all(["Noto Serif|Aa", "Noto Serif Devanagari|अआ", "Noto Serif Gujarati|અઆ"].flatMap((s) => { const [f, t] = s.split("|"); return [document.fonts.load('400 30px "' + f + '"', t), document.fonts.load('700 30px "' + f + '"', t)]; })); } catch (e) {}
+  }
+  let canvases = [];
+  async function render() {
+    await fontsReady();
+    const pages = layout(), host = $("pages");
+    host.innerHTML = ""; canvases = [];
+    pages.forEach((items, i) => {
+      const c = document.createElement("canvas"); c.width = PW; c.height = PH; c.setAttribute("role", "img"); c.setAttribute("aria-label", "Letter page " + (i + 1));
+      const ctx = c.getContext("2d"); ctx.textBaseline = "alphabetic";
+      drawBackground(ctx); for (const { b, y } of items) b.draw(ctx, y);
+      if (pages.length > 1) { ctx.font = font(Math.round(9 * DPI / 72), false); ctx.fillStyle = "#555"; ctx.textAlign = "center"; ctx.fillText("Page " + (i + 1) + " of " + pages.length, PW / 2, PH - 8 * MM); ctx.textAlign = "left"; }
+      host.appendChild(c); canvases.push(c);
+      if (pages.length > 1) { const p = document.createElement("div"); p.className = "pagelabel"; p.textContent = "Page " + (i + 1) + " of " + pages.length; host.appendChild(p); }
+    });
+    $("sampleTag").hidden = !isSample();
+  }
+
+  // ---------- PDF and sharing ----------
+  function note(text, kind) { const m = $("msg"); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); }
+  let downloadsP = null;
+  if (window.claude && typeof window.claude.use === "function") downloadsP = window.claude.use("downloads").catch(() => null);
+  function fileName() { return (($("subject").value.trim() || "Letter to parents").replace(/[\\/:*?"<>|]+/g, "").slice(0, 60).trim()) + ".pdf"; }
+
+  $("sendBtn").addEventListener("click", async () => {
+    const btn = $("sendBtn");
+    if (isSample()) { note("This is the sample. Tap Edit and type your letter first.", "err"); return; }
+    if (!window.jspdf) { note("Could not load. Check the internet and open the page again.", "err"); return; }
+    btn.disabled = true; note("Making the PDF…");
+    try {
+      await render();
+      const pdf = new window.jspdf.jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
+      canvases.forEach((c, i) => { if (i) pdf.addPage(); pdf.addImage(c.toDataURL("image/jpeg", 0.88), "JPEG", 0, 0, 210, 297, undefined, "FAST"); });
+      const blob = pdf.output("blob"), name = fileName(), file = new File([blob], name, { type: "application/pdf" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file] }); note("Done. Choose WhatsApp and the class group.", "ok"); return; }
+        catch (e) { if (e && e.name === "AbortError") { note("Not shared. Tap Share PDF again when ready."); return; } }
+      }
+      const dl = downloadsP ? await downloadsP : null;
+      if (dl) {
+        try { await dl.save({ filename: name, data: blob }); note("Saved. In WhatsApp tap the paperclip, then Document.", "ok"); return; }
+        catch (e) { if (e && e.code === "declined") { note("Not saved."); return; } }
+      }
+      const url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+      note("Saved to Downloads. In WhatsApp tap the paperclip, then Document.", "ok");
+    } catch (e) { note("Something went wrong. Open the page again and retry.", "err"); }
+    finally { btn.disabled = false; }
+  });
+
+  // ---------- start ----------
+  (async function init() {
+    for (const k of fields) { const v = store.get("f:" + k); if (v != null) $(k).value = v; }
+    for (const id in sliders) { const v = store.get(id); if (v != null) $(id).value = v; $(sliders[id][0]).textContent = $(id).value + sliders[id][1]; }
+    if (!$("date").value) $("date").value = today();
+    try { const lh = store.get("lh"); if (lh) await setLetterhead(lh, false); } catch (e) {}
+    try { signers = JSON.parse(store.get("signers") || "null") || []; } catch (e) { signers = []; }
+    try { signedBy = JSON.parse(store.get("signedBy") || "null") || []; } catch (e) { signedBy = []; }
+    if (!signers.length) {
+      // Bring over a signature saved by the earlier one-person version
+      const s = newSigner(store.get("f:sigRole") || "Headmistress");
+      s.name = store.get("f:sigName") || ""; s.sig = store.get("sg") || null;
+      signers = [s]; signedBy = [s.id]; saveSigners();
+    }
+    signedBy = signedBy.filter((id) => signers.some((s) => s.id === id));
+    for (const s of signers) { try { await loadSigImg(s); } catch (e) {} }
+    show("write");
+  })();
+})();
+</script>
+</body>
+</html>
