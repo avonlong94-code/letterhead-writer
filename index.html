@@ -165,6 +165,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
 .statuscard .meta { color: var(--muted); font-size: .9rem; }
 .statuscard .btn { min-height: 46px; flex: none; }
 .btn.tplbtn { flex: none; border-style: dashed; border-color: var(--accent); color: var(--accent); }
+.startrow .btn { padding: 12px 8px; line-height: 1.25; white-space: normal; }
 .roleline { margin: 0; font-weight: 700; }
 .roleline .pill { margin-left: 6px; }
 .sections { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-top: 8px; }
@@ -255,7 +256,11 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
         <div class="st"><strong id="statusTitle"></strong><span class="meta" id="statusText"></span></div>
         <button class="btn primary" type="button" id="statusBtn">Open</button>
       </div>
-      <button class="btn tplbtn" type="button" id="toTemplates">Start from a template</button>
+      <div class="row2 startrow">
+        <button class="btn tplbtn" type="button" id="toTemplates">Start from a template</button>
+        <button class="btn tplbtn" type="button" id="importBtn">Import from Word or PDF</button>
+      </div>
+      <input type="file" id="importFile" accept=".docx,.pdf,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
       <div class="blanks" id="blanksBox" hidden>
         <div class="blanks-head"><strong>Fill in the blanks</strong><span class="meta" id="blanksCount"></span></div>
         <p class="hint">Each answer fills that blank everywhere it appears in the letter.</p>
@@ -283,6 +288,10 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
         <label class="tick"><input type="checkbox" id="coPrimary" value="primary"><span id="coPrimaryLabel">Primary HM</span></label>
         <label class="tick"><input type="checkbox" id="coSecondary" value="secondary"><span id="coSecondaryLabel">Secondary HM</span></label>
         <small id="cosignHint">Usually Management signs alone. Tick an HM only if she should sign it too; it then goes to her to add her signature.</small>
+      </div>
+      <div class="field" id="askBox" hidden><span>Ask teachers to sign <span class="sub">(optional)</span></span>
+        <div class="chips" id="askChips"></div>
+        <small id="askHint"></small>
       </div>
       <div class="field" id="signedByBox"><span>Signed by</span>
         <div class="chips" id="signedBy"></div>
@@ -359,6 +368,8 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       <div class="sectionlab">This phone</div>
       <div class="signer">
         <p class="roleline" id="roleLine"></p>
+        <button class="btn" type="button" id="logoutBtn" style="flex:none">Log out</button>
+        <small id="logoutHint">Locks the tool now. Your letter, signatures and settings stay on this phone; enter your PIN to come back.</small>
         <label class="field"><span>Your name</span>
           <input type="text" id="myName" autocomplete="name" placeholder="e.g. Ms Priya Nair, Std 4B">
           <small>Shown to the HM with letters you send her, and on the school records.</small>
@@ -406,7 +417,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       </details>
       <p class="records" id="recordsStatus"></p>
       <button class="danger" type="button" id="clearSetup">Remove the signatures saved on this phone</button>
-      <button class="danger" type="button" id="lockPhone">Lock this phone and remove everything saved on it</button>
+      <button class="danger" type="button" id="lockPhone">Remove everything from this phone</button>
     </div>
   </div>
 </div>
@@ -532,6 +543,125 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     await page.render({ canvasContext: ctx, viewport: vp }).promise;
     return loadImage(c.toDataURL("image/jpeg", 0.9));
   }
+  // ---------- import a letter written in Word or as a PDF ----------
+  // Only the text comes across: it is split into subject, greeting, letter and closing, and then goes through the
+  // normal flow (letterhead, reference number, signatures, approval, records copy).
+  let jszipLoading = null;
+  function loadJsZip() {
+    if (window.JSZip) return Promise.resolve(window.JSZip);
+    if (!jszipLoading) jszipLoading = new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+      s.onload = () => res(window.JSZip); s.onerror = rej; document.head.appendChild(s);
+    });
+    return jszipLoading;
+  }
+  async function docxLines(file) {
+    const zip = await (await loadJsZip()).loadAsync(await file.arrayBuffer());
+    const part = zip.file("word/document.xml");
+    if (!part) throw new Error("not_docx");
+    const xml = new DOMParser().parseFromString(await part.async("string"), "application/xml");
+    const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main", out = [];
+    for (const p of Array.from(xml.getElementsByTagNameNS(W, "p"))) {
+      let t = "";
+      const walk = (n) => {
+        for (const c of Array.from(n.childNodes)) {
+          if (c.namespaceURI === W && c.localName === "t") t += c.textContent;
+          else if (c.namespaceURI === W && c.localName === "tab") t += " ";
+          else if (c.namespaceURI === W && (c.localName === "br" || c.localName === "cr")) t += "\n";
+          else if (c.namespaceURI === W && c.localName === "p") continue;   // nested (text boxes): counted on its own
+          else if (c.childNodes && c.childNodes.length) walk(c);
+        }
+      };
+      walk(p);
+      t.split("\n").forEach((x) => out.push(x.replace(/\s+/g, " ").trim()));
+      out.push("");   // every Word paragraph ends a paragraph
+    }
+    return out;
+  }
+  async function pdfLines(file) {
+    const pdfjs = await loadPdfJs();
+    const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+    const out = [];
+    for (let n = 1; n <= Math.min(doc.numPages, 10); n++) {
+      const page = await doc.getPage(n), tc = await page.getTextContent();
+      const rows = [];
+      for (const it of tc.items) {
+        if (!it.str || !it.str.trim()) continue;
+        const y = it.transform[5], x = it.transform[4], h = Math.abs(it.transform[3]) || it.height || 10;
+        let r = rows.find((q) => Math.abs(q.y - y) < h * 0.5);
+        if (!r) { r = { y, h, parts: [] }; rows.push(r); }
+        r.parts.push({ x, s: it.str });
+      }
+      rows.sort((a, b) => b.y - a.y);
+      const gaps = []; for (let i = 1; i < rows.length; i++) gaps.push(rows[i - 1].y - rows[i].y);
+      // Line spacing is the smallest gap between lines; a clearly bigger gap starts a new paragraph.
+      const line = Math.min(...gaps.filter((g) => g > 2)) || 14;
+      rows.forEach((r, i) => {
+        if (i && rows[i - 1].y - r.y > line * 1.35) out.push("");
+        out.push(r.parts.sort((a, b) => a.x - b.x).map((p) => p.s).join(" ").replace(/\s+/g, " ").trim());
+      });
+      out.push("");
+    }
+    return out;
+  }
+  // Lines (with "" between paragraphs) -> the parts of a letter.
+  function splitLetter(lines, joinLines) {
+    const isGreet = (l) => /^(dear|respected)\b/i.test(l);
+    const isSubj = (l) => /^(sub(ject)?|re)\s*[:.\-–]/i.test(l);
+    const isClose = (l) => /^(yours\b|with (warm |kind |best )?regards|warm regards|kind regards|best regards|regards,?$|thanking you|thank you,?$|sincerely)/i.test(l);
+    const isHead = (l) => /^(date|ref(erence)?\.?( no\.?)?)\s*[:.\-]/i.test(l);
+    let subject = "", greet = "", close = "", start = 0, end = lines.length;
+    const si = lines.findIndex(isSubj);
+    if (si >= 0) subject = lines[si].replace(/^(sub(ject)?|re)\s*[:.\-–]\s*/i, "").trim();
+    const gi = lines.findIndex(isGreet);
+    if (gi >= 0) { greet = lines[gi]; start = gi + 1; }
+    else if (si >= 0) start = si + 1;
+    else { let k = lines.findIndex((l) => l && !isHead(l)); start = k < 0 ? 0 : k; }
+    const ci = lines.findIndex((l, i) => i >= start && isClose(l));
+    if (ci >= 0) { close = lines[ci]; end = ci; }
+    const paras = []; let cur = [];
+    for (let i = start; i < end; i++) {
+      const l = lines[i];
+      if (i === si || isHead(l)) continue;
+      if (!l) { if (cur.length) { paras.push(cur); cur = []; } continue; }
+      cur.push(l);
+    }
+    if (cur.length) paras.push(cur);
+    const body = paras.map((p) => joinLines ? p.join(" ").replace(/(\w)- (\w)/g, "$1$2") : p.join("\n")).join("\n\n");
+    return { subject, greet, body, close };
+  }
+  let importArmed = false;
+  $("importBtn").addEventListener("click", () => {
+    if (review) { note("Finish or stop the letter you are reviewing first.", "err"); return; }
+    if ($("body").value.trim() && !importArmed) {
+      importArmed = true; setTimeout(() => { importArmed = false; }, 6000);
+      note("Importing replaces the letter you are typing. Tap Import again to go ahead.", "err"); return;
+    }
+    importArmed = false; $("importFile").value = ""; $("importFile").click();
+  });
+  $("importFile").addEventListener("change", async () => {
+    const file = $("importFile").files[0]; if (!file) return;
+    const name = file.name.toLowerCase();
+    if (/\.doc$/.test(name)) { note("That is an old Word file (.doc). In Word, use Save As and choose Word Document (.docx) or PDF, then import that.", "err"); return; }
+    note("Reading the letter…");
+    try {
+      const isPdf = /\.pdf$/.test(name) || file.type === "application/pdf";
+      const lines = isPdf ? await pdfLines(file) : /\.docx$/.test(name) ? await docxLines(file)
+        : (await file.text()).split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim());
+      const L = splitLetter(lines, isPdf);
+      if (!L.body.trim()) { note(isPdf ? "No text could be read from that PDF. It may be a scan or photo; type the letter instead, or import the Word file." : "That file has no letter text to import.", "err"); return; }
+      $("subject").value = L.subject; $("body").value = L.body;
+      if (L.greet) $("greet").value = L.greet;
+      if (L.close) $("close").value = L.close;
+      $("ref").value = autoRef() ? "" : $("ref").value;
+      for (const k of ["subject", "body", "greet", "close", "ref"]) store.set("f:" + k, $(k).value);
+      renderBlanks();
+      window.scrollTo(0, 0);
+      note("Imported. Check the subject and text, since tables, pictures and special formatting do not come across. The date" + (autoRef() ? " and reference number are" : " is") + " added here.", "ok");
+    } catch (e) { note("Could not read that file. Save it as .docx or PDF and try again.", "err"); }
+  });
+
   function downscale(img, maxW) {
     const s = Math.min(1, maxW / img.naturalWidth), c = document.createElement("canvas");
     c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
@@ -667,11 +797,48 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   const cosignChoices = () => isMgmt() ? ["primary", "secondary"] : isApprover() ? [otherSection()] : [];
   const activeCosign = () => cosign.filter((x) => cosignChoices().includes(x));
   const hmTitleOf = (sec) => JSON.parse(store.get("hms") || "{}")[sec] || (sec === "primary" ? "Primary HM" : "Secondary HM");
-  // The HMs a letter from this phone goes to, in order.
-  function approverList() {
-    if (isStaff()) return getSignMode() === "hms" ? [store.get("section"), otherSection()] : [store.get("section")];
-    return activeCosign();
+  // Order on the letter, left to right: Management, Secondary HM, Primary HM, teachers.
+  const secRank = (sec) => sec === "secondary" ? 1 : 2;
+  const myRank = () => isMgmt() ? 0 : isApprover() ? secRank(store.get("section")) : 3;
+  const rankOf = (s) => s.rank != null ? s.rank : s.guest ? 3 : myRank();
+  const byRank = (list) => list.slice().sort((a, b) => rankOf(a) - rankOf(b));
+  // Teachers an HM has asked to sign (each signs on her own phone).
+  let askT = [];
+  try { askT = JSON.parse(store.get("askT") || "[]") || []; } catch (e) { askT = []; }
+  const activeAsk = () => isApprover() ? askT : [];
+  function setAsk(list) { askT = list.slice(0, 8); store.set("askT", JSON.stringify(askT)); updateSignMode(); updateSendBtn(); }
+  let staffList = null;
+  async function loadStaff() {
+    if (!isApprover()) return;
+    try { const j = await api({ action: "staffList" }); if (j.ok) { staffList = j.staff || []; renderAsk(); } } catch (e) {}
   }
+  function renderAsk() {
+    const host = $("askChips"); host.innerHTML = "";
+    const list = (staffList || []).slice();
+    // Teachers ticked earlier who no longer appear stay on the list, so they can be unticked.
+    askT.forEach((t) => { if (!list.some((p) => p.id === t.id)) list.push({ id: t.id, name: t.name, section: "" }); });
+    const mine = store.get("section");
+    list.sort((a, b) => (a.section === mine ? 0 : 1) - (b.section === mine ? 0 : 1));
+    list.forEach((p) => {
+      const l = document.createElement("label"); l.className = "chip";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = askT.some((t) => t.id === p.id);
+      const sp = document.createElement("span"); sp.textContent = p.name + (p.section && p.section !== mine ? " (" + (p.sectionName || p.section) + ")" : "");
+      l.append(cb, sp);
+      cb.addEventListener("change", () => setAsk(cb.checked ? askT.concat([{ id: p.id, name: p.name }]) : askT.filter((t) => t.id !== p.id)));
+      host.append(l);
+    });
+    $("askHint").textContent = staffList === null ? "Loading the staff list…"
+      : list.length ? "Each teacher you tick gets the letter on her phone and adds her signature, before it goes out. Teachers appear here once they have opened the tool and added their name."
+      : "No teachers yet. A teacher appears here once she opens the tool on her phone and adds her name in Settings.";
+  }
+  // Who a letter from this phone goes to, in order: [{ hm: true|false, title, rank }].
+  function approverList() {
+    const hm = (sec) => ({ hm: true, title: hmTitleOf(sec), rank: secRank(sec) });
+    if (isStaff()) return (getSignMode() === "hms" ? [store.get("section"), otherSection()] : [store.get("section")]).map(hm);
+    const teachers = activeAsk().map((t) => ({ hm: false, title: t.name, rank: 3 }));
+    return teachers.concat(["secondary", "primary"].filter((x) => activeCosign().includes(x)).map(hm));
+  }
+  const toWho = (a) => (a.hm ? "the " : "") + a.title;
   function updateSignMode() {
     const staff = scriptOn() && isStaff() && !review, co = scriptOn() && !review && cosignChoices().length > 0, m = getSignMode();
     $("signModeBox").hidden = !staff;
@@ -688,16 +855,19 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       ? "Usually Management signs alone. Tick an HM only if she should sign too; it then goes to her to add her signature. For a letter signed by the HMs only, also untick Management under Signed by."
       : "Tick this if the " + hmTitleOf(otherSection()) + " must sign too. After your signature, it goes to her to add hers.";
     $("signedByBox").hidden = staff && (m === "hm" || m === "hms");
+    const ask = scriptOn() && isApprover() && !review;
+    $("askBox").hidden = !ask;
+    if (ask && staffList === null) { renderAsk(); loadStaff(); }
   }
   for (const id of ["smHM", "smBoth", "smHMs"]) $(id).addEventListener("change", () => { setSignMode($(id).value); renderChips(); });
   for (const id of ["coPrimary", "coSecondary"]) $(id).addEventListener("change", () => setCosign(["coPrimary", "coSecondary"].filter((x) => $(x).checked).map((x) => $(x).value)));
   // Signers that will appear on the letter from this phone; an HM who signs later has her place held.
-  const place = (title) => ({ id: "place-" + title, name: title, role: "", placeholder: true });
+  const place = (a) => ({ id: "place-" + a.title, name: a.title, role: "", placeholder: true, rank: a.rank });
   function letterSigners() {
     const own = allSigners().filter((s) => signedBy.includes(s.id));
-    if (!scriptOn() || review) return own;
-    if (isStaff()) return (getSignMode() === "both" ? own : []).concat(approverList().map((x) => place(hmTitleOf(x))));
-    return own.concat(activeCosign().map((x) => place(hmTitleOf(x))));
+    if (!scriptOn() || review) return byRank(own);
+    if (isStaff()) return byRank((getSignMode() === "both" ? own : []).concat(approverList().map(place)));
+    return byRank(own.concat(approverList().map(place)));
   }
 
   function renderChips() {
@@ -1204,7 +1374,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
           ctx.strokeRect(x, top + 2 * MM, bw, bh); ctx.setLineDash([]);
           ctx.fillStyle = "#7a8496"; ctx.font = font(Math.round(fs * 0.8), false); ctx.textAlign = "center";
           ctx.fillText(s.name + "\u2019s signature", x + bw / 2, top + 2 * MM + bh / 2 - fs * 0.15);
-          ctx.fillText("added on approval", x + bw / 2, top + 2 * MM + bh / 2 + fs * 0.85);
+          ctx.fillText("added when signed", x + bw / 2, top + 2 * MM + bh / 2 + fs * 0.85);
           ctx.restore(); ctx.textAlign = "left";
           return;
         }
@@ -1394,7 +1564,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   const isStaff = () => scriptOn() && !isApprover() && !isMgmt();
   const hmTitle = () => store.get("hmTitle") || "HM";
   // Teachers always send to their HM; Management only when it asks an HM to sign too.
-  const needsApproval = () => scriptOn() && !review && (isStaff() || activeCosign().length > 0);
+  const needsApproval = () => scriptOn() && !review && (isStaff() || activeCosign().length > 0 || activeAsk().length > 0);
   let review = null, guestSigners = [], preReview = null, editingReq = null, pendingCount = 0;
   const allSigners = () => guestSigners.concat(signers);
   const rid = () => {
@@ -1405,8 +1575,14 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   let myReqs = [];
   try { myReqs = JSON.parse(store.get("myreqs") || "[]") || []; } catch (e) { myReqs = []; }
   const saveReqs = () => store.set("myreqs", JSON.stringify(myReqs.slice(0, 25)));
+  // A private id for this phone, so an HM can ask this teacher to sign a letter.
+  function personId() {
+    let p = store.get("personId");
+    if (!p) { p = "p-" + rid(); store.set("personId", p); }
+    return p;
+  }
   async function post(payload) {
-    const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(Object.assign({ app: "letterhead-writer", section: store.get("section") || "" }, payload)) });
+    const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(Object.assign({ app: "letterhead-writer", section: store.get("section") || "", personId: personId() }, payload)) });
     return (await r.json()) || {};
   }
   async function api(payload) {
@@ -1419,7 +1595,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   // ----- lock and unlock -----
   const locked = () => scriptOn() && !store.get("pin");
   const WIPE = ["pin", "role", "section", "sectionName", "hmTitle", "hms", "cosign", "signMode", "softLocked", "lhCache", "lhv", "fitFor", "dateSlot", "signers", "signedBy", "sg", "sharedTpl", "myreqs", "outbox", "draftKey",
-                "f:subject", "f:body", "f:ref", "f:greet", "f:close", "seenApproved", "myname", "myemail", "hmpin"];
+                "f:subject", "f:body", "f:ref", "f:greet", "f:close", "seenApproved", "myname", "myemail", "hmpin", "askT", "personId"];
   function lockDevice(msg) {
     WIPE.forEach((k) => store.set(k, null));
     store.set("lockMsg", msg || "");
@@ -1444,6 +1620,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     show("lock"); $("unlockPin").value = "";
   }
   $("switchUser").addEventListener("click", () => lockDevice(""));
+  $("logoutBtn").addEventListener("click", () => softLock("Logged out. Enter your PIN to carry on; your letter and signatures are kept."));
   async function unlock() {
     const pin = $("unlockPin").value.trim(), b = $("unlockBtn"), m = $("lockMsg");
     if (!pin) { m.textContent = "Type the PIN first."; return; }
@@ -1496,7 +1673,14 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     } catch (e) { /* offline: keep working with what is saved */ }
     finally { rechecking = false; }
   }
-  function roleChanged() { pendingCount = 0; updateTopBar(); updateSendBtn(); updateWho(); refreshPending(); renderChips(); }
+  // Tell the school link this phone's name, so HMs can find teachers to ask.
+  async function sayHello() {
+    if (!scriptOn() || !store.get("pin") || !store.get("myname")) return;
+    try { await api({ action: "hello", name: store.get("myname"), email: store.get("myemail") || "" }); } catch (e) {}
+  }
+  $("myName").addEventListener("change", sayHello);
+  $("myEmail").addEventListener("change", sayHello);
+  function roleChanged() { staffList = null; pendingCount = 0; updateTopBar(); updateSendBtn(); updateWho(); refreshPending(); renderChips(); }
   function updateWho() {
     const name = store.get("myname");
     const sec = store.get("sectionName") || "";
@@ -1514,10 +1698,11 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       : "You get an email when your letter is signed off, with the approved PDF attached, or when changes are asked.";
     $("emailField").querySelector("span").firstChild.textContent = isApprover() ? "Your email " : "Your email ";
     $("pinBox").hidden = !(isApprover() || isMgmt());
+    $("logoutBtn").hidden = $("logoutHint").hidden = !scriptOn();
   }
   $("lockPhone").addEventListener("click", () => {
     const b = $("lockPhone");
-    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Tap again to lock this phone"; setTimeout(() => { delete b.dataset.armed; b.textContent = "Lock this phone and remove everything saved on it"; }, 4000); return; }
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Tap again to remove everything: letterhead, signatures, drafts and PIN"; setTimeout(() => { delete b.dataset.armed; b.textContent = "Remove everything from this phone"; }, 4000); return; }
     lockDevice("This phone is locked. Enter the PIN to use it again.");
   });
 
@@ -1585,6 +1770,13 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       $("statusBtn").textContent = "Review"; statusAction = () => go("letters");
       return;
     }
+    if (pendingCount) {
+      card.hidden = false;
+      $("statusTitle").textContent = pendingCount === 1 ? "1 letter is waiting for your signature" : pendingCount + " letters are waiting for your signature";
+      $("statusText").textContent = "The HM asked you to sign. Read it, then sign it or send it back.";
+      $("statusBtn").textContent = "Open"; statusAction = () => go("letters");
+      return;
+    }
     const rows = mineCache || {};
     const seen = JSON.parse(store.get("seenApproved") || "[]");
     const changes = myReqs.filter((r) => rows[r.id] && rows[r.id].status === "changes").length;
@@ -1626,15 +1818,16 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
 
   function updateSendBtn() {
     const b = $("sendBtn");
-    const to = approverList(), toText = to.length > 1 ? "both HMs" : "the " + hmTitleOf(to[0]);
+    const to = approverList();
+    const toText = !to.length ? "" : to.length === 1 ? toWho(to[0]) : to.length === 2 ? (to[0].hm && to[1].hm ? "both HMs" : toWho(to[0]) + " and " + toWho(to[1])) : to.length + " people";
     if (needsApproval()) b.textContent = (editingReq ? "Send again to " : "Send to ") + toText;
-    else if (review && !review.approved) b.textContent = "Approve";
+    else if (review && !review.approved) b.textContent = review.asTeacher ? "Sign" : "Approve";
     else b.textContent = mode === "share" ? "Share PDF" : (PRINT_HERE ? "Print" : "Get print PDF");
     updateSignMode();
     $("modeSeg").hidden = needsApproval();
     $("modeHint").textContent = needsApproval()
       ? "This letter goes to " + toText + (to.length > 1 ? ", one after the other" : "") + ". When it is signed off, you can share it or print it from My letters."
-      : review && !review.approved ? "Check the letter. Approve it, or send it back with a note at the bottom."
+      : review && !review.approved ? "Check the letter. " + (review.asTeacher ? "Sign it" : "Approve it") + ", or send it back with a note at the bottom."
       : mode === "share" ? "The letterhead and signatures are part of the PDF."
       : "Only the text and signatures print. The faded letterhead is shown here only to check the fit. Use A4 letterhead paper and print at 100% (Actual size).";
     $("ref").placeholder = autoRef() ? "Automatic" : "Optional";
@@ -1647,10 +1840,10 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     b.hidden = !on;
     if (!on) return;
     b.textContent = isApprover() ? "Approvals" : "My letters";
-    if (isApprover() && pendingCount) { const s = document.createElement("span"); s.className = "badge"; s.textContent = pendingCount; b.append(s); }
+    if (pendingCount) { const s = document.createElement("span"); s.className = "badge"; s.textContent = pendingCount; b.append(s); }
   }
   async function refreshPending() {
-    if (!scriptOn() || !isApprover()) { pendingCount = 0; updateTopBar(); return []; }
+    if (!scriptOn() || isMgmt()) { pendingCount = 0; updateTopBar(); return []; }
     try {
       const j = await api({ action: "pending" });
       if (j.ok) { pendingCount = (j.letters || []).length; updateTopBar(); if (view === "write") updateStatusCard(); return j.letters || []; }
@@ -1681,16 +1874,16 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     const id = editingReq || rid(), again = !!editingReq;
     const sm = getSignMode();
     const mineToo = !isStaff() || sm === "both";
-    const guests = mineToo ? signers.filter((s) => signedBy.includes(s.id)).map((s) => ({ name: s.name.trim(), role: s.role.trim(), sig: s.sig || null })) : [];
+    const guests = mineToo ? signers.filter((s) => signedBy.includes(s.id)).map((s) => ({ name: s.name.trim(), role: s.role.trim(), sig: s.sig || null, rank: myRank() })) : [];
     btn.disabled = true; note("Sending…");
     try {
-      const j = await api({ action: "submit", id, from: store.get("myname"), notify: store.get("myemail") || "", signMode: isStaff() ? sm : "", cosign: activeCosign(), letter: letterFields(), guests });
+      const j = await api({ action: "submit", id, from: store.get("myname"), notify: store.get("myemail") || "", signMode: isStaff() ? sm : "", cosign: activeCosign(), askTeachers: activeAsk().map((t) => t.id), letter: letterFields(), guests });
       if (!j.ok) { note(apiError(j), "err"); return; }
       const subj = $("subject").value.trim() || "Letter";
       if (j.ref) { $("ref").value = j.ref; store.set("f:ref", j.ref); render(); }
       myReqs = [{ id, subject: subj, ref: j.ref || "", sent: new Date().toISOString() }].concat(myReqs.filter((r) => r.id !== id)); saveReqs();
       editingReq = null; updateSendBtn();
-      note((again ? "Sent again" : "Sent") + " to the " + (j.waitingFor || "HM") + (j.ref ? ", as " + j.ref : "") + ". Follow it under " + (isApprover() ? "Approvals" : "My letters") + ".", "ok");
+      note((again ? "Sent again" : "Sent") + " to " + (j.waitingFor || "the HM") + (j.ref ? ", as " + j.ref : "") + ". Follow it under " + (isApprover() ? "Approvals" : "My letters") + ".", "ok");
       $("newAfter").hidden = false; $("backEdit").hidden = true;
     } catch (e) { note(apiError(null), "err"); }
     finally { btn.disabled = false; }
@@ -1700,9 +1893,10 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   async function startReview(L) {
     if (!review) preReview = { fields: letterFields(), signedBy: signedBy.slice() };
     else endReview(false);
-    review = { id: L.id, from: L.from || "a teacher", approved: false, final: L.final !== false, nextHM: L.nextHM || "" };
+    review = { id: L.id, from: L.from || "a teacher", approved: false, final: L.final !== false, nextHM: L.nextHM || "", asTeacher: !!L.asTeacher };
     guestSigners = [];
-    (L.guests || []).forEach((g, i) => guestSigners.push({ id: "guest-" + i, name: g.name || "", role: g.role || "", sig: g.sig || null, guest: true }));
+    const oldRank = L.fromSection === "management" ? 0 : 3;   // letters sent before signatures carried their rank
+    (L.guests || []).forEach((g, i) => guestSigners.push({ id: "guest-" + i, name: g.name || "", role: g.role || "", sig: g.sig || null, guest: true, rank: g.rank != null ? g.rank : oldRank }));
     for (const g of guestSigners) { try { await loadSigImg(g); } catch (e) {} }
     loadLetter(L.letter || {});
     const own = (preReview.signedBy || []).filter((id) => signers.some((s) => s.id === id));
@@ -1711,8 +1905,10 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     signedBy = guestSigners.map((g) => g.id).concat(mine);
     const from = review.from + (L.fromName && L.fromName !== store.get("sectionName") ? " (" + L.fromName + ")" : "");
     const already = (L.guests || []).length ? " Signatures already on it: " + L.guests.map((g) => g.name).filter(Boolean).join(", ") + "." : " It was written for you to sign.";
-    const after = review.final ? "" : " After you sign, it goes to the " + review.nextHM + ".";
-    $("reviewText").textContent = "Reviewing a letter from " + from + "." + already + after + " Make any changes, then tap Next to check and approve it.";
+    const after = review.final ? "" : " After you sign, it goes to " + review.nextHM + ".";
+    $("reviewText").textContent = review.asTeacher
+      ? from + " asked you to sign this letter." + after + " Read it, then tap Next to check it and sign."
+      : "Reviewing a letter from " + from + "." + already + after + " Make any changes, then tap Next to check and approve it.";
     $("reviewBanner").hidden = false; $("returnNote").value = "";
     updateSendBtn(); goWrite(() => { renderChips(); window.scrollTo(0, 0); });
   }
@@ -1725,23 +1921,24 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     if (restore) preReview = null;
     saveSigners(); renderChips(); updateSendBtn();
   }
-  $("stopReview").addEventListener("click", () => { endReview(true); note("Back to your own letter. The teacher's letter is still waiting in Approvals."); });
+  $("stopReview").addEventListener("click", () => { endReview(true); note("Back to your own letter. The other letter is still waiting under " + (isApprover() ? "Approvals" : "My letters") + "."); });
 
   async function approveReview(btn) {
     const c = checks();
     if (c.block) { note(c.block, "err"); return; }
+    if (review.asTeacher && !signers.some((s) => signedBy.includes(s.id) && s.sig)) { note("Add your signature in Settings first, then tick it under Signed by.", "err"); return; }
     if (c.warns.length && !sendArmed) { sendArmed = true; note("Check the list above. Tap again to approve it anyway.", "err"); setTimeout(() => { sendArmed = false; }, 6000); return; }
     sendArmed = false;
     if (!window.jspdf) { note("Could not load. Check the internet and open the page again.", "err"); return; }
-    btn.disabled = true; note("Approving…");
+    btn.disabled = true; note(review.asTeacher ? "Signing…" : "Approving…");
     try {
       if (!review.final) {
         // Not the last HM: add this HM's signature and pass it on.
-        const mySigs = signers.filter((s) => signedBy.includes(s.id)).map((s) => ({ name: s.name.trim(), role: s.role.trim(), sig: s.sig || null }));
+        const mySigs = signers.filter((s) => signedBy.includes(s.id)).map((s) => ({ name: s.name.trim(), role: s.role.trim(), sig: s.sig || null, rank: myRank() }));
         const j = await api({ action: "approve", id: review.id, mySigs, letter: letterFields() });
         if (!j.ok) { note(apiError(j), "err"); return; }
         const next = j.next || review.nextHM; endReview(true); refreshPending();
-        goWrite(() => note("Signed. It now goes to the " + next + " to add her signature.", "ok"));
+        goWrite(() => note("Signed. It now goes to " + next + " to sign.", "ok"));
         return;
       }
       if (!(await ensureRef(review.id, review.from))) return;
@@ -1752,7 +1949,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
         subject: $("subject").value.trim(), date: fmtDate($("date").value || today()), ref: $("ref").value.trim(), signedBy: names });
       if (!j.ok) { note(apiError(j), "err"); return; }
       review.approved = true; updateSendBtn(); refreshPending();
-      note("Approved, and a copy went to the school records. " + review.from + " can now send it, or tap " + $("sendBtn").textContent + " to send it yourself.", "ok");
+      note((review.asTeacher ? "Signed. That was the last signature, so the letter is final and" : "Approved, and") + " a copy went to the school records. " + review.from + " can now send it, or tap " + $("sendBtn").textContent + " to send it yourself.", "ok");
       $("newAfter").hidden = false; $("backEdit").hidden = true;
     } catch (e) { note(apiError(null), "err"); }
     finally { btn.disabled = false; }
@@ -1804,8 +2001,19 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       return;
     }
     $("lettersTitle").textContent = "My letters";
-    if (!myReqs.length) { hint.textContent = "Letters you send for signing appear here, with what was decided."; return; }
-    await appendMine(list, hint);
+    if (isStaff()) {
+      const toSign = await refreshPending();
+      if (view !== "letters") return;
+      if (Array.isArray(toSign) && toSign.length) {
+        const h = document.createElement("div"); h.className = "sectionlab"; h.textContent = "Letters for you to sign"; list.append(h);
+        toSign.forEach((L) => list.append(letterCard(L.letter && L.letter.subject || "(no subject)", "Your signature", "wait",
+          (L.letter && L.letter.ref ? L.letter.ref + " · " : "") + "From " + (L.from || "the HM") + " · " + whenText(L.sent), null, [["Read and sign", () => startReview(L), true]])));
+        if (myReqs.length) { const h2 = document.createElement("div"); h2.className = "sectionlab"; h2.textContent = "Letters you sent"; list.append(h2); }
+        hint.textContent = "";
+      }
+    }
+    if (!myReqs.length) { if (!list.children.length) hint.textContent = "Letters you send for signing appear here, with what was decided."; return; }
+    await appendMine(list, list.children.length ? null : hint);
   }
   async function appendMine(list, hint) {
     const say = (t) => { if (hint) hint.textContent = t; };
@@ -1836,6 +2044,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       const j = await api({ action: "getLetter", id: r.id });
       if (!j.ok) { note(apiError(j), "err"); return; }
       loadLetter(j.letter || {}); if (["hm", "both", "hms"].includes(j.signMode)) setSignMode(j.signMode); if (j.cosign && j.cosign.length) setCosign(j.cosign);
+      if (isApprover() && j.askTeachers) { setAsk(j.askTeachers); renderAsk(); }
       renderBlanks();
       editingReq = r.id; updateSendBtn();
       goWrite(() => note("Make the changes, then check the letter and send it again.", "ok"));
@@ -1939,6 +2148,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     flush();
     loadShared();
     refreshMine();
+    sayHello();
     const wantApprovals = location.hash === "#approvals";
     if (wantApprovals) try { history.replaceState({ lhw: "write" }, "", location.pathname); } catch (e) {}
     refreshPending().then(() => {
