@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4e8c">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
 <title>Letterhead Writer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,6 +39,7 @@
   --paper-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { min-height: 100%; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
 .wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 130px; display: flex; flex-direction: column; gap: 16px; }
@@ -107,6 +108,53 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
 .btn { flex: 1 1 0; min-height: 56px; border-radius: 14px; font: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 14px; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); flex-grow: 2; }
 .btn:disabled { opacity: .55; cursor: wait; }
+.barbtns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.tpllist { display: flex; flex-direction: column; gap: 8px; }
+.tplrow { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: stretch; }
+.sectionlab .sub { font-weight: 400; color: var(--muted); font-size: .88rem; }
+.tick { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 700; cursor: pointer; }
+.tick input { width: 22px; height: 22px; accent-color: var(--accent); margin: 0; }
+.grouplab { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 8px; }
+.grouplab:first-child { margin-top: 0; }
+.tpl { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; min-height: 60px; padding: 10px 14px; text-align: left; font: inherit; color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; min-width: 0; }
+.tpl .tt { font-weight: 700; }
+.tpl .tp { color: var(--muted); font-size: .88rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tpl.armed { border-color: var(--warn); }
+.tpl.armed .tp { color: var(--warn); white-space: normal; font-weight: 700; }
+.tpldel { font: inherit; font-size: .9rem; font-weight: 700; color: var(--warn); background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 0 12px; cursor: pointer; min-height: 60px; }
+.seg { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+.seg label { position: relative; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 56px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); font-weight: 700; font-size: .95rem; line-height: 1.25; cursor: pointer; }
+.seg input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.seg label:has(input:checked) { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.seg label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+textarea.short { min-height: 90px; font-family: var(--f-body); }
+.banner.review { background: var(--accent-soft); }
+.letter { background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.letter .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.letter .tt { font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.letter .meta { color: var(--muted); font-size: .88rem; }
+.letter .note { background: var(--warn-soft); border-radius: 8px; padding: 8px 10px; font-size: .92rem; }
+.letter .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.letter .acts .btn { min-height: 46px; font-size: .95rem; flex: 1 1 auto; }
+.pill { flex: none; font-size: .78rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.pill.wait { background: var(--accent-soft); color: var(--accent); }
+.pill.ok { background: var(--accent); color: var(--accent-ink); }
+.pill.back { background: var(--warn-soft); color: var(--warn); }
+.badge { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: var(--warn); color: var(--accent-ink); font-size: .8rem; }
+.checks { background: var(--warn-soft); border-radius: 12px; padding: 12px 14px; font-size: .95rem; }
+.checks strong { color: var(--warn); }
+.checks ul { margin: 6px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.records { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--accent-soft); font-size: .92rem; }
+#printArea { display: none; }
+@media print {
+  @page { size: A4; margin: 0; }
+  :root { padding: 0 !important; }
+  body { background: #fff !important; margin: 0 !important; }
+  body > *:not(#printArea) { display: none !important; }
+  #printArea { display: block !important; }
+  #printArea img { display: block; width: 210mm; height: 297mm; max-width: none; break-after: page; page-break-after: always; }
+  #printArea img:last-child { break-after: auto; page-break-after: auto; }
+}
 @media (prefers-reduced-motion: no-preference) { .view { animation: in .18s ease-out; } @keyframes in { from { transform: translateY(6px); } to { transform: none; } } }
 </style>
 
@@ -116,8 +164,12 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
 
   <!-- WRITE -->
   <div class="view" id="vWrite">
-    <div class="bar"><h1>New letter</h1><button class="iconbtn" type="button" id="toSettings">Settings</button></div>
+    <div class="bar"><h1>New letter</h1><div class="barbtns"><button class="iconbtn" type="button" id="toLetters" hidden>My letters</button><button class="iconbtn" type="button" id="toTemplates">Templates</button><button class="iconbtn" type="button" id="toSettings">Settings</button></div></div>
     <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">
+      <div class="banner review" id="reviewBanner" hidden>
+        <p id="reviewText"></p>
+        <button class="danger" type="button" id="stopReview" style="padding:0">Stop reviewing and go back to my own letter</button>
+      </div>
       <div class="banner" id="setupBanner" hidden>
         <p><strong>First time?</strong> Add the school letterhead and the HM's signature. It takes a minute and is saved on this phone.</p>
         <button class="btn primary" type="button" id="bannerBtn" style="flex:none">Add letterhead and signature</button>
@@ -130,7 +182,7 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
         <div class="chips" id="signedBy"></div>
         <small>Tap a name to choose. Choose more than one for a joint letter.</small>
       </div>
-      <details class="more">
+      <details class="more" id="moreDetails">
         <summary>Date, greeting and more</summary>
         <div class="inner">
           <label class="field"><span>Date</span><input type="date" id="date"></label>
@@ -147,8 +199,60 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
   <div class="view" id="vPreview" hidden>
     <div class="bar"><h1>Check the letter</h1></div>
     <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px">
+      <div class="seg" role="radiogroup" aria-label="How will this letter go out?">
+        <label><input type="radio" name="mode" id="modeShare" value="share"><span>Send on WhatsApp</span></label>
+        <label><input type="radio" name="mode" id="modePaper" value="paper"><span>Print on letterhead paper</span></label>
+      </div>
+      <p class="hint" id="modeHint"></p>
+      <p class="hint" id="refHint" hidden>A reference number is added automatically when the letter is approved or sent.</p>
+      <label class="tick" id="hmSignOpt" hidden><input type="checkbox" id="hmSigns" checked><span>Ask the HM to sign it too</span></label>
+      <div class="checks" id="checks" hidden role="status"></div>
+      <details class="more" id="saveTplBox">
+        <summary>Save as a template for next time</summary>
+        <div class="inner">
+          <label class="field"><span>Template name</span><input type="text" id="tplName2" placeholder="e.g. Sports Day notice"></label>
+          <label class="tick shareOpt" hidden><input type="checkbox" id="shareTpl2" checked><span>Share with all staff</span></label>
+          <button class="btn" type="button" id="saveTpl2" style="flex:none">Save as template</button>
+        </div>
+      </details>
       <span class="tag" id="sampleTag" hidden>Sample letter. Type your own on the previous screen.</span>
       <div class="pages" id="pages"></div>
+      <div class="signer" id="reviewPanel" hidden>
+        <label class="field"><span>Not ready? Send it back with a note</span>
+          <textarea id="returnNote" class="short" placeholder="e.g. Please change the date to the 7th."></textarea>
+        </label>
+        <button class="btn" type="button" id="sendBackBtn" style="flex:none">Send back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY LETTERS (teacher) / APPROVALS (HM) -->
+  <div class="view" id="vLetters" hidden>
+    <div class="bar"><h1 id="lettersTitle">My letters</h1></div>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px">
+      <p class="hint" id="lettersHint"></p>
+      <div class="tpllist" id="lettersList"></div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <div class="view" id="vTemplates" hidden>
+    <div class="bar"><h1>Templates</h1></div>
+    <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">
+      <p class="hint">Tap a template to start a letter from it, then change the parts in [square brackets].</p>
+      <div id="sharedSection" hidden style="display:flex;flex-direction:column;gap:8px">
+        <div class="sectionlab">Shared by the school</div>
+        <div class="tpllist" id="sharedTpl"></div>
+      </div>
+      <div class="sectionlab">My templates <span class="sub">(only on this device)</span></div>
+      <div class="tpllist" id="myTpl"></div>
+      <div class="signer">
+        <label class="field"><span>Save the current letter as a template</span><input type="text" id="tplName" placeholder="Name, e.g. Sports Day notice"></label>
+        <label class="tick shareOpt" hidden><input type="checkbox" id="shareTpl" checked><span>Share with all staff</span></label>
+        <button class="btn" type="button" id="saveTpl" style="flex:none">Save as template</button>
+      </div>
+      <div class="sectionlab">Ready-made</div>
+      <div class="tpllist" id="builtinTpl"></div>
     </div>
   </div>
 
@@ -166,10 +270,37 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
       <p class="hint" style="margin-top:-8px">Add each person once, with a photo of their signature on plain white paper.</p>
       <div id="signerList" style="display:flex;flex-direction:column;gap:14px"></div>
       <button class="btn" type="button" id="addSigner" style="flex:none">+ Add another person</button>
+      <p class="records" id="recordsStatus"></p>
+      <div id="staffBox" hidden style="display:flex;flex-direction:column;gap:14px">
+        <label class="field"><span>Your name</span>
+          <input type="text" id="myName" autocomplete="name" placeholder="e.g. Ms Priya Nair, Std 4B">
+          <small>Shown to the HM with each letter you send for approval.</small>
+        </label>
+        <label class="field" id="pinField"><span>Staff PIN</span>
+          <input type="password" id="staffPin" inputmode="numeric" autocomplete="off" placeholder="Ask the school office">
+          <small>Needed to send letters to the HM and to share templates with everyone.</small>
+        </label>
+        <details class="more" id="hmPinBox">
+          <summary>For the HM: approve letters on this phone</summary>
+          <div class="inner">
+            <label class="field"><span>HM PIN</span>
+              <input type="password" id="hmPin" inputmode="numeric" autocomplete="off" placeholder="Only for the HM or approvers">
+              <small>With the HM PIN, this phone receives teachers' letters to approve, and its own letters go out without approval.</small>
+            </label>
+          </div>
+        </details>
+      </div>
       <details class="more">
-        <summary>Text overlaps the letterhead?</summary>
+        <summary>Text position on the letterhead</summary>
         <div class="inner">
-          <p class="hint">Move these until the letter sits clear of the header and footer. Check on the preview.</p>
+          <p class="hint">The text is moved clear of the letterhead when you add it. If it still touches the header or footer, tap the button again or move the sliders, then check the preview.</p>
+          <button class="btn" type="button" id="autoFit" style="flex:none">Fit text to the letterhead</button>
+          <div class="signer" id="dateBox">
+            <label class="tick"><input type="checkbox" id="dateOnLine"><span>Write the date on the letterhead's own “Date:” line</span></label>
+            <p class="hint" id="dateFound"></p>
+            <div class="slider" id="dateAdjX"><div class="lab"><span>Date: left or right</span><output id="oDX"></output></div><input type="range" id="dX" min="100" max="190" step="0.5" value="156"></div>
+            <div class="slider" id="dateAdjY"><div class="lab"><span>Date: up or down</span><output id="oDY"></output></div><input type="range" id="dY" min="20" max="120" step="0.5" value="64"></div>
+          </div>
           <div class="slider"><div class="lab"><span>Space at top</span><output id="oTop">55 mm</output></div><input type="range" id="mTop" min="15" max="110" step="1" value="55"></div>
           <div class="slider"><div class="lab"><span>Space at bottom</span><output id="oBot">30 mm</output></div><input type="range" id="mBot" min="10" max="80" step="1" value="30"></div>
           <div class="slider"><div class="lab"><span>Side margins</span><output id="oSide">20 mm</output></div><input type="range" id="mSide" min="12" max="35" step="1" value="20"></div>
@@ -181,11 +312,15 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
   </div>
 </div>
 
+<div id="printArea" aria-hidden="true"></div>
+
 <div class="dock">
   <div class="in">
     <div class="msg" id="msg"></div>
     <div class="btns" id="dockWrite"><button class="btn primary" type="button" id="goPreview">Next: check letter</button></div>
-    <div class="btns" id="dockPreview" hidden><button class="btn" type="button" id="backEdit">Edit</button><button class="btn primary" type="button" id="sendBtn">Share PDF</button></div>
+    <div class="btns" id="dockPreview" hidden><button class="btn" type="button" id="newAfter" hidden>Start a new letter</button><button class="btn" type="button" id="backEdit">Edit</button><button class="btn primary" type="button" id="sendBtn">Share PDF</button></div>
+    <div class="btns" id="dockLetters" hidden><button class="btn" type="button" id="backFromLetters">Back to the letter</button></div>
+    <div class="btns" id="dockTemplates" hidden><button class="btn" type="button" id="backFromTpl">Back to the letter</button></div>
     <div class="btns" id="dockSettings" hidden><button class="btn primary" type="button" id="doneSettings">Done</button></div>
   </div>
 </div>
@@ -194,6 +329,13 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
 <script>
 (function () {
   "use strict";
+  // ===== School link (Google Apps Script) =====
+  // Paste the Google Apps Script web app link (ending in /exec) between the quotes below.
+  // It emails a records copy of every letter to the school office,
+  // and keeps the templates that staff share with each other.
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQjtrvr5u2N7dXLwnibyRNqKP8v9uDd5WZknfPVXXaqyF-VXQXvmblSNJ2quZBchDX2Q/exec";
+  // ============================================
+  const IN_CLAUDE = !!(window.claude && typeof window.claude.use === "function");
   const $ = (id) => document.getElementById(id);
   const DPI = 200, MM = DPI / 25.4, PW = Math.round(210 * MM), PH = Math.round(297 * MM);
   const SERIF = '"Noto Serif", "Noto Serif Devanagari", "Noto Serif Gujarati", Georgia, serif';
@@ -211,21 +353,52 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
 
   // ---------- screens ----------
   let view = "write";
+  // Each screen is a step in the browser history, so the phone's back button returns to the letter instead of leaving the tool.
+  function go(v) {
+    if (v === view) return;
+    if (v === "write") { goWrite(); return; }
+    try { if (view === "write") history.pushState({ lhw: v }, ""); else history.replaceState({ lhw: v }, ""); } catch (e) {}
+    show(v);
+  }
+  let afterWrite = null, sendArmed = false;
+  function goWrite(then) {
+    let st = null; try { st = history.state; } catch (e) {}
+    if (st && st.lhw && st.lhw !== "write") { afterWrite = typeof then === "function" ? then : null; history.back(); }
+    else { show("write"); if (typeof then === "function") then(); }
+  }
+  window.addEventListener("popstate", (e) => {
+    const v = (e.state && e.state.lhw) || "write";
+    if (v !== view) show(v);
+    if (v === "write" && afterWrite) { const f = afterWrite; afterWrite = null; f(); }
+  });
   function show(v) {
     view = v;
-    $("vWrite").hidden = v !== "write"; $("vPreview").hidden = v !== "preview"; $("vSettings").hidden = v !== "settings";
-    $("dockWrite").hidden = v !== "write"; $("dockPreview").hidden = v !== "preview"; $("dockSettings").hidden = v !== "settings";
+    $("newAfter").hidden = true; $("backEdit").hidden = false; sendArmed = false;
+    $("vWrite").hidden = v !== "write"; $("vPreview").hidden = v !== "preview"; $("vSettings").hidden = v !== "settings"; $("vTemplates").hidden = v !== "templates";
+    $("dockWrite").hidden = v !== "write"; $("dockPreview").hidden = v !== "preview"; $("dockSettings").hidden = v !== "settings"; $("dockTemplates").hidden = v !== "templates";
+    $("vLetters").hidden = v !== "letters"; $("dockLetters").hidden = v !== "letters";
+    if (v === "templates") { renderTemplates(); loadShared(); }
+    if (v === "letters") renderLetters();
     note("");
     window.scrollTo(0, 0);
     if (v === "preview") render();
-    if (v === "write") { $("setupBanner").hidden = !!(lhImg && signers.some((s) => s.sig)); renderChips(); }
-    if (v === "settings") renderSigners();
+    if (v === "write") { $("setupBanner").hidden = !!(lhImg && signers.some((s) => s.sig)) || !!review; renderChips(); updateTopBar(); }
+    if (v === "settings") { renderSigners(); updateRecordsStatus(); showSlot(); }
   }
-  $("toSettings").addEventListener("click", () => show("settings"));
-  $("bannerBtn").addEventListener("click", () => show("settings"));
-  $("doneSettings").addEventListener("click", () => show("write"));
-  $("goPreview").addEventListener("click", () => show("preview"));
-  $("backEdit").addEventListener("click", () => show("write"));
+  $("toSettings").addEventListener("click", () => go("settings"));
+  $("toTemplates").addEventListener("click", () => go("templates"));
+  $("backFromTpl").addEventListener("click", goWrite);
+  $("bannerBtn").addEventListener("click", () => go("settings"));
+  $("doneSettings").addEventListener("click", goWrite);
+  $("goPreview").addEventListener("click", () => {
+    if (!$("body").value.trim()) { note("Type the letter first, or pick one from Templates.", "err"); $("body").focus(); return; }
+    go("preview");
+  });
+  $("backEdit").addEventListener("click", goWrite);
+  $("newAfter").addEventListener("click", () => {
+    if (review) { endReview(false); preReview = null; }
+    clearLetter(); goWrite(() => $("subject").focus());
+  });
 
   // ---------- images ----------
   function loadImage(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
@@ -356,7 +529,7 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
 
   function renderChips() {
     const host = $("signedBy"); host.innerHTML = "";
-    signers.forEach((s, i) => {
+    allSigners().forEach((s, i) => {
       const l = document.createElement("label"); l.className = "chip";
       const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = "chip-" + s.id; cb.checked = signedBy.includes(s.id);
       const sp = document.createElement("span"); sp.textContent = signerLabel(s, i);
@@ -364,7 +537,7 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
       if (!s.sig) { const x = document.createElement("span"); x.className = "x"; x.textContent = "(no signature yet)"; l.append(x); }
       cb.addEventListener("change", () => {
         const set = new Set(signedBy); if (cb.checked) set.add(s.id); else set.delete(s.id);
-        signedBy = signers.map((p) => p.id).filter((id) => set.has(id)); saveSigners();
+        signedBy = allSigners().map((p) => p.id).filter((id) => set.has(id)); saveSigners();
       });
       host.append(l);
     });
@@ -375,10 +548,117 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
     try {
       const img = (f.type === "application/pdf" || /\.pdf$/i.test(f.name)) ? await pdfToImage(f) : await fileToImage(f);
       await setLetterhead(downscale(img, PW), true);
-      if (lhIsStrip) setSlider("mTop", Math.min(110, Math.max(15, Math.round(210 * img.naturalHeight / img.naturalWidth) + 8)));
+      autoFit(true);
     } catch (err) { $("lhSt").textContent = "Could not read this file. Try a JPG or PNG photo of the letterhead."; }
     e.target.value = "";
   });
+  // ---------- automatic text position ----------
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  // Finds where the printed header ends, where the footer starts, and any border down the sides.
+  function detectMargins(img) {
+    const W = 300, H = Math.round(W * img.naturalHeight / img.naturalWidth);
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, W, H);
+    const p = ctx.getImageData(0, 0, W, H).data, lum = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) lum[i] = 0.299 * p[i * 4] + 0.587 * p[i * 4 + 1] + 0.114 * p[i * 4 + 2];
+    const sorted = Array.from(lum).sort((a, b) => a - b);
+    const paper = sorted[Math.floor(sorted.length * 0.9)];
+    const cut = paper - Math.max(35, paper * 0.18);
+    const ink = (x, y) => lum[y * W + x] < cut, mmPx = 210 / W;
+    // 1. Borders running down the sides: columns near the edges that are inked through the middle of the page
+    let lPx = 0, rPx = W;
+    const y0 = Math.round(H * 0.35), y1 = Math.round(H * 0.65), band = y1 - y0;
+    for (let x = 0; x < W; x++) {
+      if (x > W * 0.2 && x < W * 0.8) continue;
+      let n = 0; for (let y = y0; y < y1; y++) if (ink(x, y)) n++;
+      if (n > band * 0.5) { if (x < W * 0.2) lPx = Math.max(lPx, x + 1); else rPx = Math.min(rPx, x); }
+    }
+    const left = lPx * mmPx, right = (W - rPx) * mmPx;
+    // 2. Header and footer, ignoring those side borders
+    const xa = Math.min(W, lPx + 3), xb = Math.max(0, rPx - 3);
+    const rowInk = new Int32Array(H);
+    for (let y = 0; y < H; y++) for (let x = xa; x < xb; x++) if (ink(x, y)) rowInk[y]++;
+    const has = (y) => rowInk[y] >= 2, gapPx = Math.round(10 / mmPx);
+    let hb = -1, gap = 0, started = false;
+    for (let y = 0; y < H * 0.45; y++) { if (has(y)) { hb = y; started = true; gap = 0; } else if (started && ++gap > gapPx) break; }
+    let ft = -1; gap = 0; started = false;
+    for (let y = H - 1; y > H * 0.65; y--) { if (has(y)) { ft = y; started = true; gap = 0; } else if (started && ++gap > gapPx) break; }
+    return {
+      top: clamp(Math.round(hb >= 0 ? (hb + 1) * mmPx + 8 : 20), 15, 110),
+      bot: clamp(Math.round(ft >= 0 ? (H - ft) * mmPx + 6 : 15), 10, 80),
+      side: clamp(Math.round(Math.max(18, left + 6, right + 6)), 12, 30)
+    };
+  }
+  // Finds a short printed line on the right, just under the header (like "Date: ______").
+  // Uses a sharper copy of the image than detectMargins, because such lines are very thin.
+  function detectDateLine(img) {
+    const W = 800, H = Math.round(W * img.naturalHeight / img.naturalWidth), mmPx = 210 / W;
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, W, H);
+    const yMax = Math.round(H * 0.45), p = ctx.getImageData(0, 0, W, yMax).data;
+    const lum = (x, y) => { const i = (y * W + x) * 4; return 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]; };
+    const sample = []; for (let i = 0; i < W * yMax; i += 7) sample.push(lum(i % W, Math.floor(i / W)));
+    sample.sort((a, b) => a - b);
+    const cut = sample[Math.floor(sample.length * 0.9)] - 30;
+    const runs = [];   // per row: longest dark run anywhere, and longest in the right part
+    for (let y = 0; y < yMax; y++) {
+      let best = [0, 0, 0], right = [0, 0, 0], run = 0, st = 0;
+      for (let x = 0; x < W; x++) {
+        if (lum(x, y) < cut) { if (!run) st = x; run++; if (run > best[0]) best = [run, st, x]; if (st >= W * 0.45 && run > right[0]) right = [run, st, x]; }
+        else run = 0;
+      }
+      runs.push({ best, right });
+    }
+    let rule = -1;
+    runs.forEach((r, y) => { if (r.best[0] >= W * 0.8) rule = y; });
+    const minLen = 15 / mmPx, gap = Math.round(1 / mmPx);
+    for (let y = Math.max(rule + 1, Math.round(H * 0.08)); y < yMax; y++) {
+      const r = runs[y].right;
+      if (r[0] < minLen || r[0] > W * 0.5) continue;
+      const near = (yy) => yy >= 0 && yy < yMax && runs[yy].right[0] > r[0] * 0.5 && runs[yy].right[1] < r[2] && runs[yy].right[2] > r[1];
+      if (near(y - gap) || near(y + gap + 1)) continue;   // a thin line, not a block of text or a box
+      return { x: +(r[1] * mmPx).toFixed(1), x2: +(r[2] * mmPx).toFixed(1), y: +((y + 0.5) * mmPx).toFixed(1) };
+    }
+    return null;
+  }
+  let dateSlot = null;
+  try { dateSlot = JSON.parse(store.get("dateSlot") || "null"); } catch (e) { dateSlot = null; }
+  const activeSlot = () => (dateSlot && dateSlot.on && lhImg) ? dateSlot : null;
+  function saveSlot() { store.set("dateSlot", dateSlot ? JSON.stringify(dateSlot) : null); showSlot(); }
+  function showSlot() {
+    const on = !!(dateSlot && dateSlot.on);
+    $("dateOnLine").checked = on;
+    $("dateAdjX").hidden = !on; $("dateAdjY").hidden = !on;
+    $("dateFound").textContent = !lhImg ? "Add the letterhead first."
+      : dateSlot && dateSlot.found ? "Your letterhead has a printed Date line. When this is ticked, the date is written on that line and not repeated in the letter."
+      : "No printed Date line was found on this letterhead, so the date goes at the top right of the letter. Tick this only if your letterhead has one, then move the date onto it with the sliders.";
+    if (dateSlot) { $("dX").value = dateSlot.x; $("dY").value = dateSlot.y; }
+    $("oDX").textContent = $("dX").value + " mm"; $("oDY").textContent = $("dY").value + " mm";
+  }
+  $("dateOnLine").addEventListener("change", () => {
+    if (!dateSlot) dateSlot = { x: 156, x2: 192, y: Math.max(20, +$("mTop").value - 6), found: false };
+    dateSlot.on = $("dateOnLine").checked; saveSlot();
+  });
+  for (const [id, key] of [["dX", "x"], ["dY", "y"]]) $(id).addEventListener("input", () => {
+    if (!dateSlot) return;
+    if (key === "x") { const w = dateSlot.x2 - dateSlot.x; dateSlot.x = +$(id).value; dateSlot.x2 = dateSlot.x + w; } else dateSlot.y = +$(id).value;
+    saveSlot();
+  });
+
+  function autoFit(quiet) {
+    if (!lhImg) { if (!quiet) note("Add the letterhead first.", "err"); return; }
+    const r = lhIsStrip
+      ? { top: clamp(Math.round(210 * lhImg.naturalHeight / lhImg.naturalWidth) + 8, 15, 110), bot: 20, side: 20 }
+      : detectMargins(lhImg);
+    const line = lhIsStrip ? null : detectDateLine(lhImg);
+    dateSlot = line ? Object.assign({ on: true, found: true }, line) : { on: false, found: false, x: 156, x2: 192, y: Math.max(20, r.top - 6) };
+    if (line) r.top = Math.max(r.top, Math.round(line.y + 8));
+    saveSlot();
+    setSlider("mTop", r.top); setSlider("mBot", r.bot); setSlider("mSide", r.side);
+    if (!quiet) note("Text moved clear of the letterhead. Check it on the preview.", "ok");
+  }
+  $("autoFit").addEventListener("click", () => autoFit(false));
+
   let clearArmed = false;
   $("clearSetup").addEventListener("click", async () => {
     if (!clearArmed) { clearArmed = true; $("clearSetup").textContent = "Tap again to remove them"; setTimeout(() => { clearArmed = false; $("clearSetup").textContent = "Remove saved letterhead and signature"; }, 4000); return; }
@@ -402,12 +682,196 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
   $("newLetter").addEventListener("click", () => {
     if (!newArmed) { newArmed = true; $("newLetter").textContent = "Tap again to clear the letter"; setTimeout(() => { newArmed = false; $("newLetter").textContent = "Clear and start a new letter"; }, 4000); return; }
     newArmed = false; $("newLetter").textContent = "Clear and start a new letter";
-    for (const k of ["ref", "subject", "body"]) { $(k).value = ""; store.set("f:" + k, null); }
-    $("date").value = today(); store.set("f:date", null); $("subject").focus();
+    clearLetter();
   });
+  function clearLetter() {
+    $("greet").value = "Dear Parents,"; $("close").value = "Yours sincerely,";
+    for (const k of ["greet", "close"]) store.set("f:" + k, null);
+    for (const k of ["ref", "subject", "body"]) { $(k).value = ""; store.set("f:" + k, null); }
+    $("date").value = today(); store.set("f:date", null);
+    $("moreDetails").open = false;
+    editingReq = null; $("hmSigns").checked = true; store.set("draftKey", null); updateSendBtn();
+  }
+
+  // ---------- templates ----------
+  // Ready-made letters, the same for everyone who uses this page. Parts in [square brackets] are to be changed.
+  const BUILTIN = [
+    { name: "Parent-Teacher Meeting", subject: "Parent-Teacher Meeting on [day, date]",
+      body: "We are pleased to invite you to the Parent-Teacher Meeting for [Std], to be held on [day, date], from [start time] to [end time] in your child's classroom.\n\nClass teachers will share your child's progress and discuss how we can support them together. We request that at least one parent attends.\n\nKindly bring the school diary with you. Students are to come in school uniform.\n\nWe look forward to meeting you." },
+    { name: "Festival holidays", subject: "[Festival] holidays",
+      body: "This is to inform you that the school will remain closed for the [festival] holidays from [first day, date] to [last day, date], both days inclusive.\n\nSchool will reopen on [day, date] at the usual time.\n\nWe wish you and your family a happy and safe [festival]." },
+    { name: "School closed due to heavy rain", subject: "School closed on [day, date] due to heavy rain",
+      body: "In view of the heavy rain warning issued by the authorities, the school will remain closed on [day, date].\n\nStudents should stay at home and stay safe. Any work missed will be covered when school reopens.\n\nWe will inform you by [time] on [day] if the closure is extended." },
+    { name: "Test timetable", subject: "[Term/Unit] Test timetable for Std [ ]",
+      body: "The [term/unit] tests for Std [ ] will be held from [date] to [date]. The timetable is given below.\n\n[Date]: [Subject]\n[Date]: [Subject]\n[Date]: [Subject]\n\nStudents must reach school by [time] and bring their own stationery. Regular attendance during this period is important.\n\nKindly ensure that your child gets enough rest and revises regularly." },
+    { name: "Fee reminder", subject: "Reminder: [term] fees due by [date]",
+      body: "This is a reminder that the fees for [term] are due by [date]. Our records show that the payment for your ward is still pending.\n\nKindly pay at the school office between [time] and [time], or by bank transfer to the account shared earlier. Please write your child's name and class on the payment slip.\n\nIf you have already paid, kindly ignore this notice. For any questions, please contact the school office." },
+    { name: "Educational trip consent", subject: "Educational trip to [place] for Std [ ]",
+      body: "We are organising an educational trip for Std [ ] to [place] on [day, date]. Students will leave school at [time] and return by [time].\n\nThe cost of the trip is ₹[amount], which covers travel and [snacks/lunch]. Teachers will accompany the students throughout.\n\nKindly return the consent slip below, signed, along with the amount, by [date].\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\nI give permission for my child, ______________________ of Std ____ Div ____, to attend the trip to [place] on [date].\n\nParent's name and signature: ______________________" },
+    { name: "Annual Day invitation", subject: "Invitation to Annual Day [year]",
+      body: "We are delighted to invite you to our Annual Day celebration on [day, date] at [venue], from [time] to [time].\n\nStudents have been preparing [performances] for many weeks, and we would be happy to have you with us.\n\nKindly be seated by [time]. Entry is with the invitation pass sent with your child. [Number] passes are given per family." },
+    { name: "Change in school timings", subject: "Change in school timings from [date]",
+      body: "Please note that from [day, date], the school timings for Std [ ] will be [start time] to [end time].\n\nKindly arrange your child's drop-off and pick-up accordingly. Bus timings will be shared by the transport office.\n\nWe thank you for your cooperation." },
+    { name: "Working Saturday", subject: "Working Saturday on [date]",
+      body: "Please note that Saturday, [date] will be a full working day for Std [ ] to [ ]. [This is in place of the holiday on date.]\n\nSchool will follow the [day of the week] timetable, and the usual timings of [start time] to [end time] will apply. Students are to come in full school uniform with books for that day's timetable.\n\nSchool buses will run as usual." }
+  ];
+  BUILTIN.forEach((t) => { t.group = "To all parents"; });
+  const ONE = "To one parent", TEACH = "Teacher notices", REF = "Referrals for learning difficulties";
+  BUILTIN.push(
+    { group: ONE, name: "Concern about behaviour", greet: "Dear [Parent's name],",
+      subject: "Concern about [Student's name]'s behaviour in school",
+      body: "We are writing to inform you about some concerns regarding the behaviour of [Student's name] of Std [ ] Div [ ].\n\nOver the past [period], [he/she] has [describe the behaviour, e.g. disturbed the class during lessons, been unkind to classmates, not followed teachers' instructions]. On [date], [describe the incident briefly].\n\nThe class teacher has spoken with [Student's name] about this, and [he/she] has been reminded of the school's code of conduct. We believe that working together with you will help [him/her] make better choices.\n\nWe request you to meet the [class teacher/supervisor] on [day, date] at [time] to discuss how we can support [Student's name]. Kindly confirm through the school diary.\n\nThank you for your support." },
+    { group: ONE, name: "Request to meet a parent", greet: "Dear [Parent's name],",
+      subject: "Request to meet regarding [Student's name]",
+      body: "We would like to meet you to discuss [Student's name]'s [progress/attendance/well-being] in school.\n\nKindly visit the school on [day, date] at [time] and meet [teacher's name], [designation]. If this time does not suit you, please let us know through the school diary or call the school office, and we will arrange another time.\n\nWe look forward to meeting you." },
+    { group: ONE, name: "Irregular attendance", greet: "Dear [Parent's name],",
+      subject: "Irregular attendance of [Student's name], Std [ ] Div [ ]",
+      body: "This is to bring to your notice that [Student's name] has been absent on [number] days in [month/period], [without a leave note / on the following dates: dates].\n\nRegular attendance is important for your child's progress, and students need [percentage]% attendance to be eligible for the final examinations.\n\nKindly ensure that [he/she] attends school regularly, and send a signed leave note whenever [he/she] is absent. If there is a health or family reason for the absences, please meet the class teacher so that we can support [Student's name]." },
+    { group: TEACH, name: "Project submission", subject: "[Subject] project for Std [ ]",
+      body: "Students of Std [ ] have been given a [subject] project on [topic]. The project must be submitted to the subject teacher by [day, date].\n\n[Brief instructions, e.g. The project should be done in a scrapbook of not more than 10 pages, with pictures and a short write-up.]\n\nStudents are expected to do the work themselves. Parents may guide them, but kindly do not complete the work for them. Late submissions will [lose marks/not be accepted]." },
+    { group: TEACH, name: "Class test", subject: "[Subject] class test for Std [ ] on [date]",
+      body: "A class test in [subject] will be held on [day, date] for Std [ ] Div [ ].\n\nPortion: [chapters/topics]\nMarks: [marks]\n\nKindly help your child revise the portion at home. Students who are absent must bring a leave note signed by a parent." },
+    { group: TEACH, name: "Items to bring for an activity", subject: "Items needed for [activity] on [day, date]",
+      body: "Students of Std [ ] will take part in [activity] on [day, date]. Kindly send the following items with your child on that day:\n\n1. [Item]\n2. [Item]\n3. [Item]\n\nPlease label all items with your child's name and class. [Students may come in (clothing) on this day.]" },
+    { group: TEACH, name: "Incomplete work", greet: "Dear [Parent's name],",
+      subject: "[Student's name]'s incomplete work in [subject]",
+      body: "This is to bring to your notice that [Student's name] of Std [ ] Div [ ] has not completed [his/her] [classwork/homework/notebook] in [subject] for [period].\n\nThe pending work includes [list the work]. Kindly ensure that this is completed and shown to me by [date].\n\nPlease sign below to confirm that you have seen this note.\n\nParent's signature: ______________________" },
+    { group: REF, name: "Letter to parent recommending an assessment", greet: "Dear [Parent's name],",
+      subject: "Recommendation for an educational assessment for [Student's name]",
+      body: "We are writing to share our observations about [Student's name] of Std [ ] Div [ ], and to recommend an educational assessment.\n\nOver the past [period], [his/her] teachers have noticed that [he/she] [describe the difficulties, e.g. finds it hard to read fluently, makes frequent spelling errors, reverses letters or numbers, takes much longer than classmates to finish written work]. These difficulties have continued despite extra support in class, including [support given, e.g. remedial sessions, extra time, simplified worksheets].\n\n[Student's name] is a [strength, e.g. bright and cheerful] child, and we would like to understand how [he/she] learns best. An assessment by a qualified professional can show whether there is a specific learning difficulty and what support would help [him/her].\n\nWe recommend an assessment at [name of hospital, clinic or psychologist]. A referral letter with our observations is enclosed for you to take to the assessment.\n\nKindly meet [counsellor's name], our school counsellor, on [day, date] at [time] to discuss this. All information will be kept confidential." },
+    { group: REF, name: "Referral letter to the assessing professional", greet: "Dear Sir/Madam,",
+      subject: "Referral for psycho-educational assessment: [Student's full name], Std [ ]",
+      body: "We are referring [Student's full name], date of birth [date], studying in Std [ ] Div [ ] of our school, for a psycho-educational assessment for a specific learning disability.\n\nBackground: [Student's name] has been a student of our school since [year]. The medium of instruction is [English], and [he/she] studies [second language] and [third language].\n\nDifficulties observed\nReading: [e.g. reads slowly, guesses words, loses place on the line]\nWriting and spelling: [e.g. frequent spelling errors, letter reversals, poorly organised written answers]\nMathematics: [e.g. difficulty with number facts, place value, word problems]\nAttention and behaviour: [e.g. easily distracted, does not finish written tasks]\n\nSupport given in school: [e.g. remedial sessions twice a week since month, extra time in class tests, seating near the teacher]\n\nAcademic performance: [summary of recent marks, e.g. Term 1: English 45%, Mathematics 38%]\n\nStrengths: [e.g. good oral answers, art, sports]\n\nWe would be grateful for your assessment and your recommendations for support at school and at home, including any provisions for examinations. Copies of recent notebooks and test papers are enclosed.\n\nFor further information, please contact [counsellor's name] at [phone number/email]." }
+  );
+  let myTpls = [];
+  try { myTpls = JSON.parse(store.get("templates") || "[]") || []; } catch (e) { myTpls = []; }
+  const saveTpls = () => store.set("templates", JSON.stringify(myTpls));
+
+  function tplButton(t) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "tpl";
+    const tt = document.createElement("span"); tt.className = "tt"; tt.textContent = t.name;
+    const tp = document.createElement("span"); tp.className = "tp"; tp.textContent = t.subject || t.body.split("\n")[0];
+    b.append(tt, tp);
+    let armed = false;
+    b.addEventListener("click", () => {
+      const typed = $("body").value.trim() || $("subject").value.trim();
+      if (typed && !armed) {
+        armed = true; b.classList.add("armed"); tp.textContent = "Tap again to use it. This replaces the letter you have typed.";
+        setTimeout(() => { armed = false; b.classList.remove("armed"); tp.textContent = t.subject || t.body.split("\n")[0]; }, 4000);
+        return;
+      }
+      useTemplate(t);
+    });
+    return b;
+  }
+  function useTemplate(t) {
+    $("subject").value = t.subject || ""; $("body").value = t.body || "";
+    $("greet").value = t.greet || "Dear Parents,";
+    for (const k of ["subject", "body", "greet"]) store.set("f:" + k, $(k).value);
+    goWrite(() => {
+      const greetBlank = $("greet").value.includes("[");
+      if (greetBlank) $("moreDetails").open = true;
+      note(greetBlank ? "Change the parts in [square brackets], including the greeting." : "Change the parts in [square brackets].", "ok");
+      const ta = $("body"), i = ta.value.indexOf("[");
+      if (i >= 0) { const j = ta.value.indexOf("]", i); ta.focus(); ta.setSelectionRange(i, j >= 0 ? j + 1 : i + 1); }
+    });
+  }
+  // ---------- shared templates (kept by the school's Google Apps Script) ----------
+  const scriptOn = () => !!SCRIPT_URL && !IN_CLAUDE;
+  let sharedTpls = [], sharedOffline = false;
+  try { sharedTpls = JSON.parse(store.get("sharedTpl") || "[]") || []; } catch (e) { sharedTpls = []; }
+  function keepShared(list) { if (Array.isArray(list)) { sharedTpls = list; store.set("sharedTpl", JSON.stringify(list)); } }
+  async function loadShared() {
+    if (!scriptOn()) return;
+    try {
+      const r = await fetch(SCRIPT_URL + "?action=templates"); const j = await r.json();
+      if (j && j.ok) { keepShared(j.templates); sharedOffline = false; }
+    } catch (e) { sharedOffline = true; }
+    if (view === "templates") renderTemplates();
+  }
+  async function sharedAction(payload) {
+    const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(Object.assign({ app: "letterhead-writer", pin: store.get("hmpin") || store.get("pin") || "" }, payload)) });
+    const j = await r.json();
+    if (j && j.ok) keepShared(j.templates);
+    return j || {};
+  }
+  const sharedError = (j) => j && j.error === "wrong_pin" ? "The staff PIN is not right. Check it in Settings." : "Could not reach the school link. Check the internet and try again.";
+
+  function renderTemplates() {
+    const on = scriptOn(), hasPin = !!(store.get("pin") || store.get("hmpin"));
+    $("sharedSection").hidden = !on;
+    document.querySelectorAll(".shareOpt").forEach((el) => { el.hidden = !on; });
+    if (on) {
+      const sh = $("sharedTpl"); sh.innerHTML = "";
+      if (!sharedTpls.length) { const p = document.createElement("p"); p.className = "hint"; p.textContent = sharedOffline ? "No internet. Shared templates will show when you are online." : "None yet. Save a letter with “Share with all staff” ticked and it appears here for everyone."; sh.append(p); }
+      else if (sharedOffline) { const p = document.createElement("p"); p.className = "hint"; p.textContent = "No internet. Showing the last list this device saw."; sh.append(p); }
+      sharedTpls.forEach((t) => {
+        if (!hasPin) { sh.append(tplButton(t)); return; }
+        const row = document.createElement("div"); row.className = "tplrow";
+        const del = document.createElement("button"); del.type = "button"; del.className = "tpldel"; del.textContent = "Delete";
+        let armed = false;
+        del.addEventListener("click", async () => {
+          if (!armed) { armed = true; del.textContent = "Sure?"; setTimeout(() => { armed = false; del.textContent = "Delete"; }, 4000); return; }
+          del.disabled = true; note("Removing it for everyone…");
+          try { const j = await sharedAction({ action: "deleteTemplate", id: t.id }); if (j.ok) note("Removed “" + t.name + "” for everyone.", "ok"); else note(sharedError(j), "err"); }
+          catch (e) { note(sharedError(null), "err"); }
+          renderTemplates();
+        });
+        row.append(tplButton(t), del); sh.append(row);
+      });
+    }
+    const mine = $("myTpl"); mine.innerHTML = "";
+    if (!myTpls.length) { const p = document.createElement("p"); p.className = "hint"; p.textContent = "None yet. Write a letter, then save it below to use again."; mine.append(p); }
+    myTpls.forEach((t) => {
+      const row = document.createElement("div"); row.className = "tplrow";
+      const del = document.createElement("button"); del.type = "button"; del.className = "tpldel"; del.textContent = "Delete";
+      let armed = false;
+      del.addEventListener("click", () => {
+        if (!armed) { armed = true; del.textContent = "Sure?"; setTimeout(() => { armed = false; del.textContent = "Delete"; }, 4000); return; }
+        myTpls = myTpls.filter((x) => x.id !== t.id); saveTpls(); renderTemplates();
+      });
+      row.append(tplButton(t), del); mine.append(row);
+    });
+    const built = $("builtinTpl"); built.innerHTML = "";
+    let last = null;
+    BUILTIN.forEach((t) => {
+      if (t.group !== last) { last = t.group; const h = document.createElement("div"); h.className = "grouplab"; h.textContent = t.group; built.append(h); }
+      built.append(tplButton(t));
+    });
+  }
+  async function saveTemplate(nameInput, shareBox) {
+    const body = $("body").value.trim();
+    if (!body) { note("Type a letter first, then save it as a template.", "err"); return false; }
+    const name = nameInput.value.trim() || $("subject").value.trim() || "My template";
+    const t = { id: uid(), name, subject: $("subject").value.trim(), body, greet: $("greet").value.trim() };
+    if (scriptOn() && shareBox.checked) {
+      if (!store.get("pin") && !store.get("hmpin")) { note("To share with all staff, add the staff PIN in Settings first. Or untick sharing to keep it on this device.", "err"); return false; }
+      note("Sharing with all staff…");
+      try {
+        const j = await sharedAction({ action: "saveTemplate", template: t });
+        if (!j.ok) { note(sharedError(j), "err"); return false; }
+      } catch (e) { note(sharedError(null), "err"); return false; }
+      nameInput.value = "";
+      if (view === "templates") renderTemplates();
+      note("Shared with all staff: “" + name + "”.", "ok");
+      return true;
+    }
+    const same = myTpls.findIndex((x) => x.name.toLowerCase() === name.toLowerCase());
+    if (same >= 0) myTpls[same] = t; else myTpls.unshift(t);
+    if (!saveTpls()) { note("Could not save the template on this browser.", "err"); return false; }
+    nameInput.value = "";
+    if (view === "templates") renderTemplates();
+    note((same >= 0 ? "Updated template " : "Saved as template ") + "“" + name + "”.", "ok");
+    return true;
+  }
+  $("saveTpl").addEventListener("click", async () => { const b = $("saveTpl"); b.disabled = true; await saveTemplate($("tplName"), $("shareTpl")); b.disabled = false; });
+  $("saveTpl2").addEventListener("click", async () => { const b = $("saveTpl2"); b.disabled = true; if (await saveTemplate($("tplName2"), $("shareTpl2"))) $("saveTplBox").open = false; b.disabled = false; });
+  $("staffPin").addEventListener("input", () => store.set("pin", $("staffPin").value.trim() || null));
+  $("myName").addEventListener("input", () => store.set("myname", $("myName").value.trim() || null));
+  $("hmPin").addEventListener("input", () => { store.set("hmpin", $("hmPin").value.trim() || null); approverChanged(); });
 
   // ---------- drawing ----------
-  const isSample = () => !$("body").value.trim();
+  const isSample = () => !$("body").value.trim() && !$("subject").value.trim();
   const val = (id) => (id === "subject" || id === "body") && isSample() ? SAMPLE[id] : $(id).value;
   function font(px, bold) { return (bold ? "700 " : "400 ") + px + "px " + SERIF; }
   function wrap(ctx, text, maxW) {
@@ -429,15 +893,22 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
     }
     return out;
   }
-  function drawBackground(ctx) {
+  // bg: "full" = letterhead in the PDF, "faint" = faded guide on screen only, "none" = text only for letterhead paper
+  function drawBackground(ctx, bg) {
     ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, PW, PH);
-    if (lhImg) { if (lhIsStrip) ctx.drawImage(lhImg, 0, 0, PW, PW * lhImg.naturalHeight / lhImg.naturalWidth); else ctx.drawImage(lhImg, 0, 0, PW, PH); return; }
-    const top = 38 * MM;
-    ctx.fillStyle = "#f3f5f9"; ctx.fillRect(0, 0, PW, top);
-    ctx.fillStyle = "#1f4e8c"; ctx.fillRect(0, top - 1.2 * MM, PW, 1.2 * MM);
-    ctx.textAlign = "center"; ctx.font = font(Math.round(7 * MM), true); ctx.fillText("Your school letterhead goes here", PW / 2, 20 * MM);
-    ctx.fillStyle = "#6b778a"; ctx.font = font(Math.round(3.6 * MM), false); ctx.fillText("Add it in Settings and it replaces this band", PW / 2, 28 * MM);
-    ctx.textAlign = "left";
+    if (bg === "none") return;
+    ctx.save(); if (bg === "faint") ctx.globalAlpha = 0.28;
+    if (lhImg) {
+      if (lhIsStrip) ctx.drawImage(lhImg, 0, 0, PW, PW * lhImg.naturalHeight / lhImg.naturalWidth); else ctx.drawImage(lhImg, 0, 0, PW, PH);
+    } else {
+      const top = 38 * MM;
+      ctx.fillStyle = "#f3f5f9"; ctx.fillRect(0, 0, PW, top);
+      ctx.fillStyle = "#1f4e8c"; ctx.fillRect(0, top - 1.2 * MM, PW, 1.2 * MM);
+      ctx.textAlign = "center"; ctx.font = font(Math.round(7 * MM), true); ctx.fillText("Your school letterhead goes here", PW / 2, 20 * MM);
+      ctx.fillStyle = "#6b778a"; ctx.font = font(Math.round(3.6 * MM), false); ctx.fillText("Add it in Settings and it replaces this band", PW / 2, 28 * MM);
+      ctx.textAlign = "left";
+    }
+    ctx.restore();
   }
   function layout() {
     const m = { top: +$("mTop").value * MM, bot: +$("mBot").value * MM, side: +$("mSide").value * MM };
@@ -446,21 +917,36 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
     const text = (ctx, s, x, y, bold, align) => { ctx.font = font(fs, bold); ctx.fillStyle = "#111"; ctx.textAlign = align || "left"; ctx.fillText(s, x, y + fs); ctx.textAlign = "left"; };
     const blocks = [];
     const ref = $("ref").value.trim(), dateTxt = fmtDate($("date").value || today());
-    blocks.push({ h: lh * 2, draw(ctx, y) { if (ref) text(ctx, "Ref: " + ref, m.side, y); text(ctx, dateTxt, PW - m.side, y, false, "right"); } });
+    const slot = activeSlot();
+    let first = null;
+    if (slot) {
+      // The letterhead has its own "Date: ____" line: fill it in, and put the Ref. no. at the same height on the left.
+      m.top = Math.max(m.top, (slot.y + 7) * MM);
+      first = (ctx) => {
+        const base = (slot.y - 1.3) * MM, maxw = (slot.x2 - slot.x + 2) * MM;
+        let f = fs; ctx.font = font(f, false);
+        while (ctx.measureText(dateTxt).width > maxw && f > fs * 0.75) { f--; ctx.font = font(f, false); }
+        ctx.fillStyle = "#111"; ctx.textAlign = "left"; ctx.fillText(dateTxt, (slot.x + 1.5) * MM, base);
+        if (ref) { ctx.font = font(fs, false); ctx.fillText("Ref: " + ref, m.side, base); }
+      };
+      blocks.push({ h: lh * 0.4, draw() {} });
+    } else {
+      blocks.push({ h: lh * 2, draw(ctx, y) { if (ref) text(ctx, "Ref: " + ref, m.side, y); text(ctx, dateTxt, PW - m.side, y, false, "right"); } });
+    }
     const subj = val("subject").trim();
     if (subj) { meas.font = font(fs, true); const ls = wrap(meas, "Subject: " + subj, maxW); ls.forEach((ln, i) => blocks.push({ h: lh + (i === ls.length - 1 ? lh * 0.6 : 0), draw(ctx, y) { text(ctx, ln, m.side, y, true); } })); }
     const greet = $("greet").value.trim();
     if (greet) blocks.push({ h: lh * 1.6, draw(ctx, y) { text(ctx, greet, m.side, y); } });
     meas.font = font(fs, false);
-    for (const ln of wrap(meas, val("body").replace(/\n{3,}/g, "\n\n").trim(), maxW)) blocks.push({ h: ln ? lh : lh * 0.6, draw(ctx, y) { if (ln) text(ctx, ln, m.side, y); } });
+    for (const ln of wrap(meas, val("body").replace(/\n{3,}/g, "\n\n").trim(), maxW)) blocks.push({ body: true, gap: !ln, h: ln ? lh : lh * 0.6, draw(ctx, y) { if (ln) text(ctx, ln, m.side, y); } });
     // Signature block: one column per signer, up to three per row, kept together on one page
     const sigH = 22 * MM, closeTxt = $("close").value.trim();
-    const chosen = signers.filter((s) => signedBy.includes(s.id));
+    const chosen = allSigners().filter((s) => signedBy.includes(s.id));
     const perRow = Math.min(3, Math.max(1, chosen.length)), colW = maxW / perRow;
     const anyRole = chosen.some((s) => s.role.trim());
     const rowH = sigH + lh + (anyRole ? lh : 0) + lh * 0.6;
     const nRows = Math.ceil(chosen.length / perRow);
-    blocks.push({ h: lh * 1.2 + (closeTxt ? lh : 0) + (chosen.length ? nRows * rowH : lh * 2.2), draw(ctx, y) {
+    blocks.push({ sig: true, h: lh * 1.2 + (closeTxt ? lh : 0) + (chosen.length ? nRows * rowH : lh * 2.2), draw(ctx, y) {
       let yy = y + lh * 1.2;
       if (closeTxt) { text(ctx, closeTxt, m.side, yy); yy += lh; }
       chosen.forEach((s, i) => {
@@ -477,66 +963,469 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
         if (roleLine) text(ctx, roleLine, x, top + sigH + lh);
       });
     }});
-    const pages = [[]]; let y = m.top; const limit = PH - m.bot;
-    for (const b of blocks) { if (y + b.h > limit && pages[pages.length - 1].length) { pages.push([]); y = m.top; } pages[pages.length - 1].push({ b, y }); y += b.h; }
-    return pages;
+    const pages = [[]]; let y = m.top; const limit = PH - m.bot - 6 * MM;
+    for (const b of blocks) {
+      let cur = pages[pages.length - 1];
+      if (y + b.h > limit && cur.length) {
+        // Never leave the signatures alone on a new page: take the last two lines of the letter with them.
+        const carry = [];
+        if (b.sig) {
+          let lines = 0;
+          while (cur.length > 1 && lines < 2) {
+            const last = cur[cur.length - 1].b;
+            if (!last.body) break;
+            cur.pop(); carry.unshift(last); if (!last.gap) lines++;
+          }
+        }
+        while (cur.length && cur[cur.length - 1].b.gap) cur.pop();
+        pages.push([]); cur = pages[pages.length - 1]; y = m.top;
+        for (const c of carry) { if (!cur.length && c.gap) continue; cur.push({ b: c, y }); y += c.h; }
+      }
+      if (!cur.length && b.gap) continue;   // no blank line at the top of a page
+      cur.push({ b, y }); y += b.h;
+    }
+    return { pages, m, first };
   }
   async function fontsReady() {
     try { await Promise.all(["Noto Serif|Aa", "Noto Serif Devanagari|अआ", "Noto Serif Gujarati|અઆ"].flatMap((s) => { const [f, t] = s.split("|"); return [document.fonts.load('400 30px "' + f + '"', t), document.fonts.load('700 30px "' + f + '"', t)]; })); } catch (e) {}
   }
-  let canvases = [];
+  function paint(bg) {
+    const { pages, m, first } = layout(), out = [];
+    pages.forEach((items, i) => {
+      const c = document.createElement("canvas"); c.width = PW; c.height = PH;
+      const ctx = c.getContext("2d"); ctx.textBaseline = "alphabetic";
+      drawBackground(ctx, bg); if (i === 0 && first) first(ctx); for (const { b, y } of items) b.draw(ctx, y);
+      if (pages.length > 1) { ctx.font = font(Math.round(9 * DPI / 72), false); ctx.fillStyle = "#555"; ctx.textAlign = "right"; ctx.fillText("Page " + (i + 1) + " of " + pages.length, PW - m.side, PH - m.bot - 1.5 * MM); ctx.textAlign = "left"; }
+      out.push(c);
+    });
+    return out;
+  }
   async function render() {
     await fontsReady();
-    const pages = layout(), host = $("pages");
-    host.innerHTML = ""; canvases = [];
-    pages.forEach((items, i) => {
-      const c = document.createElement("canvas"); c.width = PW; c.height = PH; c.setAttribute("role", "img"); c.setAttribute("aria-label", "Letter page " + (i + 1));
-      const ctx = c.getContext("2d"); ctx.textBaseline = "alphabetic";
-      drawBackground(ctx); for (const { b, y } of items) b.draw(ctx, y);
-      if (pages.length > 1) { ctx.font = font(Math.round(9 * DPI / 72), false); ctx.fillStyle = "#555"; ctx.textAlign = "center"; ctx.fillText("Page " + (i + 1) + " of " + pages.length, PW / 2, PH - 8 * MM); ctx.textAlign = "left"; }
-      host.appendChild(c); canvases.push(c);
-      if (pages.length > 1) { const p = document.createElement("div"); p.className = "pagelabel"; p.textContent = "Page " + (i + 1) + " of " + pages.length; host.appendChild(p); }
+    const cs = paint(mode === "paper" ? "faint" : "full"), host = $("pages");
+    host.innerHTML = "";
+    cs.forEach((c, i) => {
+      c.setAttribute("role", "img"); c.setAttribute("aria-label", "Letter page " + (i + 1)); host.appendChild(c);
+      if (cs.length > 1) { const p = document.createElement("div"); p.className = "pagelabel"; p.textContent = "Page " + (i + 1) + " of " + cs.length; host.appendChild(p); }
     });
     $("sampleTag").hidden = !isSample();
+    updateChecks();
   }
 
-  // ---------- PDF and sharing ----------
+  // ---------- checks before sending ----------
+  function checks() {
+    const warns = [];
+    const all = [$("subject").value, $("body").value, $("greet").value, $("close").value].join("\n");
+    const blanks = Array.from(new Set(all.match(/\[[^\]\n]{0,60}\]/g) || []));
+    if (blanks.length) warns.push("Parts in square brackets still need filling in: " + blanks.slice(0, 4).join(", ") + (blanks.length > 4 ? " and more" : "") + ".");
+    const chosen = allSigners().filter((s) => signedBy.includes(s.id));
+    const toHM = needsApproval();
+    if (!chosen.length && !(toHM && $("hmSigns").checked)) warns.push("Nobody is chosen under “Signed by”, so the letter has no signature.");
+    else {
+      const noSig = chosen.filter((s) => !s.sig).map((s) => s.name.trim() || "a signer");
+      if (noSig.length) warns.push("No signature photo yet for " + noSig.join(", ") + ". Add it in Settings.");
+      if (chosen.some((s) => !s.name.trim())) warns.push("A signer has no name under the signature. Add it in Settings.");
+    }
+    const block = !lhImg && (review || (mode === "share" && !toHM)) ? "Add the school letterhead in Settings first. Without it the PDF has a grey placeholder band." : null;
+    return { block, warns };
+  }
+  function updateChecks() {
+    const c = checks(), el = $("checks"), items = (c.block ? [c.block] : []).concat(c.warns);
+    el.innerHTML = ""; el.hidden = !items.length;
+    if (!items.length) return;
+    const h = document.createElement("strong"); h.textContent = "Before you send";
+    const ul = document.createElement("ul");
+    items.forEach((t) => { const li = document.createElement("li"); li.textContent = t; ul.append(li); });
+    el.append(h, ul);
+  }
+  function toPdf(cs) {
+    const pdf = new window.jspdf.jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
+    cs.forEach((c, i) => { if (i) pdf.addPage(); pdf.addImage(c.toDataURL("image/jpeg", 0.88), "JPEG", 0, 0, 210, 297, undefined, "FAST"); });
+    return pdf.output("blob");
+  }
+
+  // ---------- how the letter goes out ----------
+  const PRINT_HERE = !IN_CLAUDE && !(window.matchMedia && matchMedia("(pointer: coarse)").matches);
+  let mode = store.get("mode") === "paper" ? "paper" : "share";
+  function setMode(m) {
+    mode = m; store.set("mode", m);
+    $("modeShare").checked = m === "share"; $("modePaper").checked = m === "paper";
+    updateSendBtn();
+    $("modeHint").textContent = m === "share"
+      ? "The letterhead and signatures are part of the PDF."
+      : "Only the text and signatures print. The faded letterhead is shown here only to check the fit. Use A4 letterhead paper and print at 100% (Actual size).";
+    if (view === "preview") render();
+  }
+  $("modeShare").addEventListener("change", () => setMode("share"));
+  $("modePaper").addEventListener("change", () => setMode("paper"));
+
   function note(text, kind) { const m = $("msg"); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); }
   let downloadsP = null;
-  if (window.claude && typeof window.claude.use === "function") downloadsP = window.claude.use("downloads").catch(() => null);
-  function fileName() { return (($("subject").value.trim() || "Letter to parents").replace(/[\\/:*?"<>|]+/g, "").slice(0, 60).trim()) + ".pdf"; }
+  if (IN_CLAUDE) downloadsP = window.claude.use("downloads").catch(() => null);
+  function fileName(suffix) { return (($("subject").value.trim() || "Letter to parents").replace(/[\\/:*?"<>|]+/g, "").slice(0, 60).trim()) + (suffix || "") + ".pdf"; }
+
+  // Share sheet on phones, Claude's save prompt inside Claude, otherwise a normal download.
+  async function deliver(blob, name) {
+    const file = new File([blob], name, { type: "application/pdf" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file] }); return "shared"; }
+      catch (e) { if (e && e.name === "AbortError") return "cancelled"; }
+    }
+    const dl = downloadsP ? await downloadsP : null;
+    if (dl) {
+      try { await dl.save({ filename: name, data: blob }); return "saved"; }
+      catch (e) { if (e && e.code === "declined") return "cancelled"; }
+    }
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+    return "downloaded";
+  }
 
   $("sendBtn").addEventListener("click", async () => {
     const btn = $("sendBtn");
     if (isSample()) { note("This is the sample. Tap Edit and type your letter first.", "err"); return; }
+    if (needsApproval()) { await submitForApproval(btn); return; }
+    if (review && !review.approved) { await approveReview(btn); return; }
+    const c = checks();
+    if (c.block) { note(c.block, "err"); return; }
+    if (c.warns.length && !sendArmed) {
+      sendArmed = true; note("Check the list above. Tap again to go ahead anyway.", "err");
+      setTimeout(() => { sendArmed = false; }, 6000); return;
+    }
+    sendArmed = false;
     if (!window.jspdf) { note("Could not load. Check the internet and open the page again.", "err"); return; }
-    btn.disabled = true; note("Making the PDF…");
+    btn.disabled = true; note(mode === "share" ? "Making the PDF…" : "Getting the page ready…");
     try {
-      await render();
-      const pdf = new window.jspdf.jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
-      canvases.forEach((c, i) => { if (i) pdf.addPage(); pdf.addImage(c.toDataURL("image/jpeg", 0.88), "JPEG", 0, 0, 210, 297, undefined, "FAST"); });
-      const blob = pdf.output("blob"), name = fileName(), file = new File([blob], name, { type: "application/pdf" });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try { await navigator.share({ files: [file] }); note("Done. Choose WhatsApp and the class group.", "ok"); return; }
-        catch (e) { if (e && e.name === "AbortError") { note("Not shared. Tap Share PDF again when ready."); return; } }
+      if (!(review && review.approved)) {
+        if (!(await ensureRef(draftKey(), store.get("myname") || "HM"))) return;
+        if (!$("refHint").hidden) { updateSendBtn(); await render(); }
       }
-      const dl = downloadsP ? await downloadsP : null;
-      if (dl) {
-        try { await dl.save({ filename: name, data: blob }); note("Saved. In WhatsApp tap the paperclip, then Document.", "ok"); return; }
-        catch (e) { if (e && e.code === "declined") { note("Not saved."); return; } }
+      await fontsReady();
+      let msg, how;
+      if (mode === "share") {
+        const r = await deliver(toPdf(paint("full")), fileName());
+        if (r === "cancelled") { note("Not shared. Tap Share PDF again when ready."); return; }
+        how = "Shared as PDF";
+        msg = r === "shared" ? "Done. Choose WhatsApp and the class group." : "Saved. In WhatsApp tap the paperclip, then Document.";
+      } else if (PRINT_HERE) {
+        const area = $("printArea"); area.innerHTML = "";
+        for (const c of paint("none")) { const im = new Image(); im.alt = ""; im.src = c.toDataURL("image/png"); area.appendChild(im); }
+        await Promise.all(Array.from(area.images || area.querySelectorAll("img")).map((im) => im.decode ? im.decode().catch(() => {}) : null));
+        window.print();
+        how = "Printed on letterhead paper";
+        msg = "Sent to the printer. Load A4 letterhead paper and print at 100%.";
+      } else {
+        const r = await deliver(toPdf(paint("none")), fileName(" (for letterhead paper)"));
+        if (r === "cancelled") { note("Not saved. Tap Get print PDF again when ready."); return; }
+        how = "Made for printing on letterhead paper";
+        msg = "Print this PDF on A4 letterhead paper at 100% (Actual size).";
       }
-      const url = URL.createObjectURL(blob), a = document.createElement("a");
-      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
-      note("Saved to Downloads. In WhatsApp tap the paperclip, then Document.", "ok");
+      note(msg, "ok");
+      $("newAfter").hidden = false; $("backEdit").hidden = true;
+      if (recordsOn() && !(review && review.approved)) {
+        await keepRecord(toPdf(paint("full")), fileName(), how);
+        const sent = await flush();
+        note(msg + (sent ? " A copy went to the school records email." : " The records copy will send when there is internet."), "ok");
+      }
     } catch (e) { note("Something went wrong. Open the page again and retry.", "err"); }
     finally { btn.disabled = false; }
   });
+
+
+  // ---------- approval by the HM ----------
+  // Teacher phones send every letter to the HM. A phone with the HM PIN is an approver: it reviews,
+  // approves (adding its own signature) or sends letters back, and its own letters go out directly.
+  const isApprover = () => !!store.get("hmpin");
+  const needsApproval = () => scriptOn() && !isApprover() && !review;
+  let review = null, guestSigners = [], preReview = null, editingReq = null, pendingCount = 0;
+  const allSigners = () => guestSigners.concat(signers);
+  const rid = () => {
+    const a = new Uint8Array(12);
+    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(a); else for (let i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256);
+    return Array.from(a, (b) => b.toString(36).padStart(2, "0")).join("").slice(0, 18);
+  };
+  let myReqs = [];
+  try { myReqs = JSON.parse(store.get("myreqs") || "[]") || []; } catch (e) { myReqs = []; }
+  const saveReqs = () => store.set("myreqs", JSON.stringify(myReqs.slice(0, 25)));
+  async function api(payload, pinKey) {
+    const pin = pinKey ? store.get(pinKey) : (store.get("hmpin") || store.get("pin"));
+    const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(Object.assign({ app: "letterhead-writer", pin: pin || "" }, payload)) });
+    return (await r.json()) || {};
+  }
+  const apiError = (j) => j && j.error === "wrong_pin" ? "The PIN is not right. Check it in Settings." : "Could not reach the school link. Check the internet and try again.";
+  const whenText = (iso) => {
+    try { const d = new Date(iso); return d.getDate() + " " + ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()] + ", " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+    catch (e) { return ""; }
+  };
+
+  // ----- reference numbers (given by the school link, only to final letters) -----
+  const autoRef = () => scriptOn();
+  function draftKey() {
+    let k = store.get("draftKey");
+    if (!k) { k = "d-" + rid(); store.set("draftKey", k); }
+    return k;
+  }
+  async function ensureRef(key, from) {
+    if (!autoRef() || !isApprover() || $("ref").value.trim()) return true;
+    try {
+      const j = await api({ action: "nextRef", key, subject: $("subject").value.trim(), from: from || "" }, "hmpin");
+      if (!j.ok || !j.ref) { note(j.error === "wrong_pin" ? apiError(j) : "Could not get a reference number. Check the internet and try again.", "err"); return false; }
+      $("ref").value = j.ref; store.set("f:ref", j.ref);
+      return true;
+    } catch (e) { note("Could not get a reference number. Check the internet and try again.", "err"); return false; }
+  }
+
+  function updateSendBtn() {
+    const b = $("sendBtn");
+    if (needsApproval()) b.textContent = editingReq ? "Send again to the HM" : "Send to the HM";
+    else if (review && !review.approved) b.textContent = "Approve";
+    else b.textContent = mode === "share" ? "Share PDF" : (PRINT_HERE ? "Print" : "Get print PDF");
+    $("hmSignOpt").hidden = !needsApproval();
+    $("ref").placeholder = autoRef() ? (isApprover() ? "Added automatically when you send or approve" : "Added automatically when the HM approves") : "Leave empty if not needed";
+    $("refHint").hidden = !(autoRef() && !$("ref").value.trim());
+    $("reviewPanel").hidden = !(review && !review.approved);
+    if (review) $("sendBackBtn").textContent = "Send back to " + review.from;
+  }
+  function updateTopBar() {
+    const b = $("toLetters"), on = scriptOn();
+    b.hidden = !on;
+    if (!on) return;
+    b.textContent = isApprover() ? "Approvals" : "My letters";
+    if (isApprover() && pendingCount) { const s = document.createElement("span"); s.className = "badge"; s.textContent = pendingCount; b.append(s); }
+  }
+  async function refreshPending() {
+    if (!scriptOn() || !isApprover()) { pendingCount = 0; updateTopBar(); return []; }
+    try {
+      const j = await api({ action: "pending" }, "hmpin");
+      if (j.ok) { pendingCount = (j.letters || []).length; updateTopBar(); return j.letters || []; }
+      if (j.error === "wrong_pin") { pendingCount = 0; updateTopBar(); return { error: j }; }
+    } catch (e) {}
+    return null;
+  }
+  function approverChanged() { pendingCount = 0; updateTopBar(); updateSendBtn(); refreshPending(); }
+  $("toLetters").addEventListener("click", () => go("letters"));
+  $("backFromLetters").addEventListener("click", goWrite);
+
+  // The parts of a letter that travel between phones
+  const letterFields = () => ({ subject: $("subject").value, body: $("body").value, greet: $("greet").value, close: $("close").value, ref: $("ref").value, date: $("date").value, mode });
+  function loadLetter(L) {
+    for (const k of ["subject", "body", "greet", "close", "ref"]) { $(k).value = L[k] || ""; store.set("f:" + k, $(k).value); }
+    if (!$("greet").value) $("greet").value = "Dear Parents,";
+    if (!$("close").value) $("close").value = "Yours sincerely,";
+    $("date").value = L.date || today();
+    if (L.mode === "paper" || L.mode === "share") setMode(L.mode);
+  }
+
+  // ----- teacher: send to the HM -----
+  async function submitForApproval(btn) {
+    if (!store.get("myname")) { note("Add your name in Settings, so the HM knows who sent the letter.", "err"); return; }
+    if (!store.get("pin")) { note("Add the staff PIN in Settings before sending letters to the HM.", "err"); return; }
+    const c = checks();
+    if (c.warns.length && !sendArmed) { sendArmed = true; note("Check the list above. Tap again to send it anyway.", "err"); setTimeout(() => { sendArmed = false; }, 6000); return; }
+    sendArmed = false;
+    const id = editingReq || rid(), again = !!editingReq;
+    const guests = signers.filter((s) => signedBy.includes(s.id)).map((s) => ({ name: s.name.trim(), role: s.role.trim(), sig: s.sig || null }));
+    btn.disabled = true; note("Sending to the HM…");
+    try {
+      const j = await api({ action: "submit", id, from: store.get("myname"), hmSigns: $("hmSigns").checked, letter: letterFields(), guests }, "pin");
+      if (!j.ok) { note(apiError(j), "err"); return; }
+      const subj = $("subject").value.trim() || "Letter";
+      myReqs = [{ id, subject: subj, sent: new Date().toISOString() }].concat(myReqs.filter((r) => r.id !== id)); saveReqs();
+      editingReq = null; updateSendBtn();
+      note((again ? "Sent again" : "Sent") + " to the HM for approval. Follow it under My letters.", "ok");
+      $("newAfter").hidden = false; $("backEdit").hidden = true;
+    } catch (e) { note(apiError(null), "err"); }
+    finally { btn.disabled = false; }
+  }
+
+  // ----- HM: review, approve, send back -----
+  async function startReview(L) {
+    if (!review) preReview = { fields: letterFields(), signedBy: signedBy.slice() };
+    else endReview(false);
+    review = { id: L.id, from: L.from || "a teacher", approved: false };
+    guestSigners = [];
+    (L.guests || []).forEach((g, i) => guestSigners.push({ id: "guest-" + i, name: g.name || "", role: g.role || "", sig: g.sig || null, guest: true }));
+    for (const g of guestSigners) { try { await loadSigImg(g); } catch (e) {} }
+    loadLetter(L.letter || {});
+    const own = (preReview.signedBy || []).filter((id) => signers.some((s) => s.id === id));
+    const first = signers.find((s) => s.sig);
+    const mine = own.length ? own : (first ? [first.id] : []);
+    signedBy = guestSigners.map((g) => g.id).concat(L.hmSigns === false ? [] : mine);
+    $("reviewText").textContent = "Reviewing a letter from " + review.from + ". Make any changes, then tap Next to check and approve it.";
+    $("reviewBanner").hidden = false; $("returnNote").value = "";
+    updateSendBtn(); goWrite(() => { renderChips(); window.scrollTo(0, 0); });
+  }
+  function endReview(restore) {
+    for (const g of guestSigners) sigImgs.delete(g.id);
+    guestSigners = []; review = null;
+    $("reviewBanner").hidden = true;
+    if (restore && preReview) { loadLetter(preReview.fields); signedBy = preReview.signedBy.filter((id) => signers.some((s) => s.id === id)); }
+    else signedBy = signedBy.filter((id) => signers.some((s) => s.id === id));
+    if (restore) preReview = null;
+    saveSigners(); renderChips(); updateSendBtn();
+  }
+  $("stopReview").addEventListener("click", () => { endReview(true); note("Back to your own letter. The teacher's letter is still waiting in Approvals."); });
+
+  async function approveReview(btn) {
+    const c = checks();
+    if (c.block) { note(c.block, "err"); return; }
+    if (c.warns.length && !sendArmed) { sendArmed = true; note("Check the list above. Tap again to approve it anyway.", "err"); setTimeout(() => { sendArmed = false; }, 6000); return; }
+    sendArmed = false;
+    if (!window.jspdf) { note("Could not load. Check the internet and open the page again.", "err"); return; }
+    btn.disabled = true; note("Approving…");
+    try {
+      if (!(await ensureRef(review.id, review.from))) return;
+      await fontsReady(); await render();
+      const full = await blobToB64(toPdf(paint("full"))), print = await blobToB64(toPdf(paint("none")));
+      const names = allSigners().filter((s) => signedBy.includes(s.id)).map((s) => s.name.trim()).filter(Boolean).join(", ");
+      const j = await api({ action: "approve", id: review.id, full, print, filename: fileName(), letter: letterFields(),
+        subject: $("subject").value.trim(), date: fmtDate($("date").value || today()), ref: $("ref").value.trim(), signedBy: names }, "hmpin");
+      if (!j.ok) { note(apiError(j), "err"); return; }
+      review.approved = true; updateSendBtn(); refreshPending();
+      note("Approved, and a copy went to the school records. " + review.from + " can now send it, or tap " + $("sendBtn").textContent + " to send it yourself.", "ok");
+      $("newAfter").hidden = false; $("backEdit").hidden = true;
+    } catch (e) { note(apiError(null), "err"); }
+    finally { btn.disabled = false; }
+  }
+  $("sendBackBtn").addEventListener("click", async () => {
+    const msg = $("returnNote").value.trim();
+    if (!msg) { note("Write a short note so the teacher knows what to change.", "err"); $("returnNote").focus(); return; }
+    const b = $("sendBackBtn"); b.disabled = true; note("Sending it back…");
+    try {
+      const j = await api({ action: "sendBack", id: review.id, comment: msg }, "hmpin");
+      if (!j.ok) { note(apiError(j), "err"); return; }
+      const who = review.from; endReview(true); refreshPending();
+      goWrite(() => note("Sent back to " + who + " with your note.", "ok"));
+    } catch (e) { note(apiError(null), "err"); }
+    finally { b.disabled = false; }
+  });
+
+  // ----- the My letters (teacher) / Approvals (HM) screen -----
+  function letterCard(title, pill, pillCls, meta, noteText, actions) {
+    const card = document.createElement("div"); card.className = "letter";
+    const top = document.createElement("div"); top.className = "top";
+    const tt = document.createElement("div"); tt.className = "tt"; tt.textContent = title;
+    const p = document.createElement("span"); p.className = "pill " + pillCls; p.textContent = pill;
+    top.append(tt, p); card.append(top);
+    if (meta) { const m = document.createElement("div"); m.className = "meta"; m.textContent = meta; card.append(m); }
+    if (noteText) { const n = document.createElement("div"); n.className = "note"; n.textContent = noteText; card.append(n); }
+    if (actions.length) {
+      const a = document.createElement("div"); a.className = "acts";
+      for (const [label, fn, primary] of actions) {
+        const b = document.createElement("button"); b.type = "button"; b.className = "btn" + (primary ? " primary" : ""); b.textContent = label;
+        b.addEventListener("click", () => fn(b)); a.append(b);
+      }
+      card.append(a);
+    }
+    return card;
+  }
+  async function renderLetters() {
+    const list = $("lettersList"), hint = $("lettersHint");
+    list.innerHTML = ""; hint.textContent = "Loading…";
+    if (isApprover()) {
+      $("lettersTitle").textContent = "Approvals";
+      const letters = await refreshPending();
+      if (view !== "letters") return;
+      if (!Array.isArray(letters)) { hint.textContent = apiError(letters && letters.error); return; }
+      hint.textContent = letters.length ? "Tap Review to read a letter, change it if needed, then approve it or send it back." : "No letters are waiting for you.";
+      letters.forEach((L) => list.append(letterCard(L.letter && L.letter.subject || "(no subject)", "Waiting", "wait",
+        "From " + (L.from || "a teacher") + " · " + whenText(L.sent), null, [["Review", () => startReview(L), true]])));
+      return;
+    }
+    $("lettersTitle").textContent = "My letters";
+    if (!myReqs.length) { hint.textContent = "Letters you send to the HM appear here, with what she decided."; return; }
+    const rows = {};
+    try {
+      const j = await api({ action: "status", ids: myReqs.map((r) => r.id) }, "pin");
+      if (!j.ok) { hint.textContent = apiError(j); return; }
+      (j.letters || []).forEach((r) => { rows[r.id] = r; });
+    } catch (e) { hint.textContent = apiError(null); return; }
+    if (view !== "letters") return;
+    hint.textContent = "Approved letters can be shared or printed from here.";
+    myReqs.forEach((r) => {
+      const row = rows[r.id] || { status: "missing" };
+      const st = row.status;
+      const meta = "Sent " + whenText(r.sent) + (row.updated && (st === "approved" || st === "changes") ? " · " + (st === "approved" ? "approved " : "returned ") + whenText(row.updated) : "");
+      if (st === "approved") list.append(letterCard(r.subject, "Approved", "ok", meta, null, [
+        ["Share PDF", (b) => getApproved(r, "full", b), true], ["Print version", (b) => getApproved(r, "print", b)]]));
+      else if (st === "changes") list.append(letterCard(r.subject, "Changes asked", "back", meta, "HM’s note: " + (row.comment || ""), [["Open and fix", (b) => reopen(r, b), true]]));
+      else if (st === "pending") list.append(letterCard(r.subject, "Waiting for the HM", "wait", meta, null, [["Open and change", (b) => reopen(r, b)]]));
+      else list.append(letterCard(r.subject, "Not found", "back", meta, "The school link no longer has this letter.", [["Remove from list", () => { myReqs = myReqs.filter((x) => x.id !== r.id); saveReqs(); renderLetters(); }]]));
+    });
+  }
+  async function reopen(r, b) {
+    b.disabled = true;
+    try {
+      const j = await api({ action: "getLetter", id: r.id }, "pin");
+      if (!j.ok) { note(apiError(j), "err"); return; }
+      loadLetter(j.letter || {}); $("hmSigns").checked = j.hmSigns !== false;
+      editingReq = r.id; updateSendBtn();
+      goWrite(() => note("Make the changes, then check the letter and send it again.", "ok"));
+    } catch (e) { note(apiError(null), "err"); }
+    finally { b.disabled = false; }
+  }
+  async function getApproved(r, kind, b) {
+    b.disabled = true; note("Getting the approved letter…");
+    try {
+      const j = await api({ action: "getPdf", id: r.id, kind }, "pin");
+      if (!j.ok || !j.pdf) { note(apiError(j), "err"); return; }
+      const bytes = Uint8Array.from(atob(j.pdf), (ch) => ch.charCodeAt(0));
+      const name = (r.subject || "Letter").replace(/[\\/:*?"<>|]+/g, "").slice(0, 60) + (kind === "print" ? " (for letterhead paper)" : "") + ".pdf";
+      const res = await deliver(new Blob([bytes], { type: "application/pdf" }), name);
+      if (res === "cancelled") { note("Not shared."); return; }
+      note(kind === "print" ? "Print it on A4 letterhead paper at 100% (Actual size)." : (res === "shared" ? "Done. Choose WhatsApp and the class group." : "Saved. In WhatsApp tap the paperclip, then Document."), "ok");
+    } catch (e) { note(apiError(null), "err"); }
+    finally { b.disabled = false; }
+  }
+
+  // ---------- records copy (emailed through the school's Google Apps Script) ----------
+  const recordsOn = () => !!SCRIPT_URL && !IN_CLAUDE;
+  let outbox = [], flushing = false;
+  try { outbox = JSON.parse(store.get("outbox") || "[]") || []; } catch (e) { outbox = []; }
+  function saveBox() { if (!store.set("outbox", JSON.stringify(outbox))) store.set("outbox", null); }
+  const blobToB64 = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(blob); });
+  async function keepRecord(blob, name, how) {
+    const names = allSigners().filter((s) => signedBy.includes(s.id)).map((s) => s.name.trim()).filter(Boolean);
+    outbox.push({
+      id: uid(), app: "letterhead-writer", filename: name, how,
+      subject: $("subject").value.trim(), date: fmtDate($("date").value || today()), ref: $("ref").value.trim(),
+      signedBy: names.join(", "), made: new Date().toISOString(), pdf: await blobToB64(blob)
+    });
+    outbox = outbox.slice(-5); saveBox();
+  }
+  async function flush() {
+    if (!recordsOn()) return false;
+    if (flushing) return !outbox.length;
+    flushing = true;
+    try {
+      while (outbox.length) {
+        let j = null;
+        try { const r = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(outbox[0]) }); j = await r.json(); } catch (e) { j = null; }
+        if (!j || (!j.ok && !j.drop)) break;
+        outbox.shift(); saveBox();
+      }
+    } finally { flushing = false; updateRecordsStatus(); }
+    return !outbox.length;
+  }
+  function updateRecordsStatus() {
+    const el = $("recordsStatus");
+    if (IN_CLAUDE) el.textContent = "Records copy: this works on the school website version of this tool, not inside Claude.";
+    else if (!SCRIPT_URL) el.textContent = "Records copy: not set up yet. Ask the office to add the school email link.";
+    else el.textContent = "Records copy: every letter you share or print is emailed to the school office." + (outbox.length ? " " + outbox.length + " waiting for internet." : "");
+    $("staffBox").hidden = !scriptOn();
+    for (const [id, key] of [["staffPin", "pin"], ["myName", "myname"], ["hmPin", "hmpin"]]) if (document.activeElement !== $(id)) $(id).value = store.get(key) || "";
+    $("hmPinBox").open = !!store.get("hmpin");
+  }
+  window.addEventListener("online", flush);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") flush(); });
 
   // ---------- start ----------
   (async function init() {
     for (const k of fields) { const v = store.get("f:" + k); if (v != null) $(k).value = v; }
     for (const id in sliders) { const v = store.get(id); if (v != null) $(id).value = v; $(sliders[id][0]).textContent = $(id).value + sliders[id][1]; }
-    if (!$("date").value) $("date").value = today();
+    // The date always starts as today, so an old draft never goes out with last week's date.
+    $("date").value = today(); store.set("f:date", null);
+    try { history.replaceState({ lhw: "write" }, ""); } catch (e) {}
     try { const lh = store.get("lh"); if (lh) await setLetterhead(lh, false); } catch (e) {}
     try { signers = JSON.parse(store.get("signers") || "null") || []; } catch (e) { signers = []; }
     try { signedBy = JSON.parse(store.get("signedBy") || "null") || []; } catch (e) { signedBy = []; }
@@ -548,7 +1437,15 @@ input[type=range] { width: 100%; height: 36px; accent-color: var(--accent); }
     }
     signedBy = signedBy.filter((id) => signers.some((s) => s.id === id));
     for (const s of signers) { try { await loadSigImg(s); } catch (e) {} }
+    // A letterhead saved before automatic fitting existed, with sliders never touched: fit it now
+    if (lhImg && (store.get("mTop") == null || store.get("dateSlot") == null)) autoFit(true);
+    setMode(mode);
     show("write");
+    updateSendBtn();
+    flush();
+    loadShared();
+    refreshPending().then(() => { if (location.hash === "#approvals" && isApprover()) go("letters"); });
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshPending(); });
   })();
 })();
 </script>
