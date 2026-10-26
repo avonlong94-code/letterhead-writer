@@ -19,11 +19,11 @@
 /* Layout: one narrow phone column, one screen at a time (Write, Check and send, Settings), with a fixed bottom bar holding the next action. */
 :root {
   /* Cumballa Hill: school maroon on warm beige paper */
-  --bg: #f4ede1;
-  --surface: #fffaf3;
+  --bg: #fbf7f0;
+  --surface: #fffdf9;
   --ink: #2a1a17;
   --muted: #6f5d55;
-  --line: #e0d1bd;
+  --line: #e9ddcc;
   --accent: #7b1e2c;
   --accent-ink: #fff8f0;
   --accent-soft: #f1e1d7;
@@ -417,7 +417,6 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       </details>
       <p class="records" id="recordsStatus"></p>
       <button class="danger" type="button" id="clearSetup">Remove the signatures saved on this phone</button>
-      <button class="danger" type="button" id="lockPhone">Remove everything from this phone</button>
     </div>
   </div>
 </div>
@@ -1594,10 +1593,13 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
 
   // ----- lock and unlock -----
   const locked = () => scriptOn() && !store.get("pin");
-  const WIPE = ["pin", "role", "section", "sectionName", "hmTitle", "hms", "cosign", "signMode", "softLocked", "lhCache", "lhv", "fitFor", "dateSlot", "signers", "signedBy", "sg", "sharedTpl", "myreqs", "outbox", "draftKey",
-                "f:subject", "f:body", "f:ref", "f:greet", "f:close", "seenApproved", "myname", "myemail", "hmpin", "askT", "personId"];
-  function lockDevice(msg) {
-    WIPE.forEach((k) => store.set(k, null));
+  const WIPE = ["pin", "role", "section", "sectionName", "hmTitle", "hms", "cosign", "signMode", "softLocked", "lhCache", "lhv", "fitFor", "dateSlot", "sharedTpl", "myreqs", "outbox", "draftKey",
+                "f:subject", "f:body", "f:ref", "f:greet", "f:close", "seenApproved", "hmpin", "askT"];
+  // The owner's name, email and signatures stay on the phone through a lock, so they never need adding again.
+  // Only five wrong PINs in a row (someone else trying to get in) removes them too.
+  const OWNER = ["signers", "signedBy", "sg", "myname", "myemail", "personId"];
+  function lockDevice(msg, all) {
+    WIPE.concat(all ? OWNER : []).forEach((k) => store.set(k, null));
     store.set("lockMsg", msg || "");
     try { history.replaceState(null, "", location.pathname); } catch (e) {}
     location.reload();
@@ -1627,7 +1629,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     if (softLocked()) {
       if (pin === store.get("pin")) { store.set("softLocked", null); store.set("wrongTries", null); $("unlockPin").value = ""; m.textContent = ""; touch(true); await ready(); return; }
       const n = Number(store.get("wrongTries") || 0) + 1; store.set("wrongTries", String(n));
-      if (n >= 5) { lockDevice("Five wrong PINs were entered, so this phone was locked and its saved letterhead and signatures removed."); return; }
+      if (n >= 5) { lockDevice("Five wrong PINs were entered, so this phone was locked and its saved letterhead and signatures removed.", true); return; }
       m.textContent = "That PIN is not right. " + (5 - n) + (5 - n === 1 ? " try" : " tries") + " left before this phone is cleared.";
       $("unlockPin").value = ""; return;
     }
@@ -1700,11 +1702,6 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     $("pinBox").hidden = !(isApprover() || isMgmt());
     $("logoutBtn").hidden = $("logoutHint").hidden = !scriptOn();
   }
-  $("lockPhone").addEventListener("click", () => {
-    const b = $("lockPhone");
-    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Tap again to remove everything: letterhead, signatures, drafts and PIN"; setTimeout(() => { delete b.dataset.armed; b.textContent = "Remove everything from this phone"; }, 4000); return; }
-    lockDevice("This phone is locked. Enter the PIN to use it again.");
-  });
 
   // ----- change a PIN (HMs: their section; Management: any) -----
   function fillPinSlots() {
