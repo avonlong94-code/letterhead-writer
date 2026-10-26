@@ -260,13 +260,11 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   <div class="view" id="vSettings" hidden>
     <div class="bar"><h1>Letterhead and signature</h1></div>
     <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">
-      <p class="hint">Do this once on each phone. Tap a box to choose a photo or file.</p>
+      <p class="hint">Do this once on each phone.</p>
       <div class="tile" id="lhTile">
         <div class="thumb" id="lhThumb">+</div>
-        <div><div class="t">1. School letterhead</div><div class="s" id="lhSt">A photo, scan or PDF of a blank letterhead</div></div>
-        <input type="file" id="lhFile" accept="image/*,application/pdf" aria-label="Choose a different letterhead">
+        <div><div class="t">1. School letterhead</div><div class="s" id="lhSt">Built in, the same on every phone</div></div>
       </div>
-      <button class="danger" type="button" id="lhSchoolBtn" hidden style="padding:0">Go back to the school letterhead</button>
       <div class="sectionlab">2. People who sign letters</div>
       <p class="hint" style="margin-top:-8px">Add each person once, with a photo of their signature on plain white paper.</p>
       <div id="signerList" style="display:flex;flex-direction:column;gap:14px"></div>
@@ -308,7 +306,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
           <div class="slider"><div class="lab"><span>Text size</span><output id="oSize">11.5 pt</output></div><input type="range" id="fSize" min="10" max="14" step="0.5" value="11.5"></div>
         </div>
       </details>
-      <button class="danger" type="button" id="clearSetup">Reset letterhead and signatures on this phone</button>
+      <button class="danger" type="button" id="clearSetup">Remove the signatures saved on this phone</button>
     </div>
   </div>
 </div>
@@ -472,7 +470,6 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     lhIsStrip = lhImg ? (lhImg.naturalHeight / lhImg.naturalWidth) < 0.8 : false;
     lhIsSchool = false;
     setTile("lh", dataUrl, "Your own letterhead on this phone. Tap to change", "A photo, scan or PDF of a blank letterhead");
-    $("lhSchoolBtn").hidden = !(lhImg && SCHOOL_LH);
     if (save && !store.set("lh", dataUrl)) note("Letterhead added, but this browser could not save it for next time.", "err");
   }
   // The built-in school letterhead: nothing to upload, the same on every device.
@@ -480,13 +477,8 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     if (!SCHOOL_LH) { await setLetterhead(null, true); return; }
     await setLetterhead(SCHOOL_LH, false);
     lhIsSchool = true; store.set("lh", null);
-    $("lhSt").textContent = "Built in, the same on every phone. Tap only to use a different one here";
-    $("lhSchoolBtn").hidden = true;
+    $("lhSt").textContent = "Built in, the same on every phone";
   }
-  $("lhSchoolBtn").addEventListener("click", async () => {
-    await useSchoolLetterhead(); autoFit(true); store.set("fitFor", "school-2");
-    note("Using the school letterhead again.", "ok");
-  });
   // ---------- signers ----------
   const uid = () => Math.random().toString(36).slice(2, 9);
   const signerLabel = (s, i) => s.name.trim() || "Person " + (i + 1);
@@ -563,16 +555,6 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       host.append(l);
     });
   }
-  $("lhFile").addEventListener("change", async (e) => {
-    const f = e.target.files[0]; if (!f) return;
-    $("lhSt").textContent = "Reading…";
-    try {
-      const img = (f.type === "application/pdf" || /\.pdf$/i.test(f.name)) ? await pdfToImage(f) : await fileToImage(f);
-      await setLetterhead(downscale(img, PW), true);
-      autoFit(true); store.set("fitFor", "own");
-    } catch (err) { $("lhSt").textContent = "Could not read this file. Try a JPG or PNG photo of the letterhead."; }
-    e.target.value = "";
-  });
   // ---------- automatic text position ----------
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   // Finds where the printed header ends, where the footer starts, and any border down the sides.
@@ -682,8 +664,8 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
 
   let clearArmed = false;
   $("clearSetup").addEventListener("click", async () => {
-    if (!clearArmed) { clearArmed = true; $("clearSetup").textContent = "Tap again to remove them"; setTimeout(() => { clearArmed = false; $("clearSetup").textContent = "Reset letterhead and signatures on this phone"; }, 4000); return; }
-    clearArmed = false; $("clearSetup").textContent = "Reset letterhead and signatures on this phone";
+    if (!clearArmed) { clearArmed = true; $("clearSetup").textContent = "Tap again to remove them"; setTimeout(() => { clearArmed = false; $("clearSetup").textContent = "Remove the signatures saved on this phone"; }, 4000); return; }
+    clearArmed = false; $("clearSetup").textContent = "Remove the signatures saved on this phone";
     await useSchoolLetterhead(); if (lhImg) { autoFit(true); store.set("fitFor", "school-2"); }
     sigImgs.clear(); signers = [newSigner("Headmistress")]; signedBy = [signers[0].id]; saveSigners(); renderSigners();
   });
@@ -1447,7 +1429,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     // The date always starts as today, so an old draft never goes out with last week's date.
     $("date").value = today(); store.set("f:date", null);
     try { history.replaceState({ lhw: "write" }, ""); } catch (e) {}
-    try { const lh = store.get("lh"); if (lh) await setLetterhead(lh, false); else await useSchoolLetterhead(); } catch (e) {}
+    try { store.set("lh", null); await useSchoolLetterhead(); } catch (e) {}
     try { signers = JSON.parse(store.get("signers") || "null") || []; } catch (e) { signers = []; }
     try { signedBy = JSON.parse(store.get("signedBy") || "null") || []; } catch (e) { signedBy = []; }
     if (!signers.length) {
