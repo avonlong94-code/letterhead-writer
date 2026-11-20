@@ -81,6 +81,12 @@ textarea { min-height: 46vh; resize: vertical; line-height: 1.6; font-family: va
 .rt-ed table { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: .95em; }
 .rt-ed td, .rt-ed th { border: 1px solid var(--muted); padding: 4px 6px; vertical-align: top; min-width: 2.5em; }
 .rt-ed font[size="2"] { font-size: 14.5px; } .rt-ed font[size="3"] { font-size: 17px; } .rt-ed font[size="4"] { font-size: 20.5px; } .rt-ed font[size="5"] { font-size: 24.5px; }
+.tobox { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--surface); }
+.tobox { margin: -6px 0 14px; } .tobox .field { margin-bottom: 6px; }
+.tobox textarea { min-height: 0; }
+.tobox small, .gfirst .sub { color: var(--muted); font-size: .85rem; font-weight: 400; }
+.check.gfirst { display: flex; gap: 10px; align-items: flex-start; margin: -4px 0 14px; font-size: .95rem; line-height: 1.35; }
+.check.gfirst input { width: 22px; height: 22px; flex: 0 0 auto; margin-top: 1px; accent-color: var(--accent); }
 textarea::placeholder, input::placeholder { color: var(--muted); opacity: .8; }
 input:focus-visible, textarea:focus-visible, button:focus-visible, summary:focus-visible, .tile:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
 
@@ -287,8 +293,16 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
         <label class="field"><span>Date</span><input type="date" id="date"></label>
         <label class="field"><span>Ref. no.</span><input type="text" id="ref" placeholder="Leave empty if not needed"></label>
       </div>
+      <label class="check gfirst"><input type="checkbox" id="outside"> Letter to an outside organisation <span class="sub">(adds who it is addressed to, and uses your own reference number)</span></label>
+      <div class="field tobox" id="toBox" hidden>
+        <label class="field"><span>Addressed to</span>
+          <textarea id="to" rows="4" placeholder="e.g.&#10;The Trustees,&#10;Sunshine Foundation,&#10;Mumbai 400 036."></textarea></label>
+        <small>Printed above the subject, line by line as you type it. Type the reference number for this series in Ref. no. above. It does not use up a school number, and if you leave it empty the letter has none.</small>
+      </div>
+      <div id="greetSlotTop"></div>
       <label class="field"><span>Subject</span><input type="text" id="subject" placeholder="e.g. Diwali holidays"></label>
-      <label class="field"><span>Greeting</span><input type="text" id="greet" value="Dear Parents,"></label>
+      <div id="greetSlot"><label class="field" id="greetField"><span>Greeting</span><input type="text" id="greet" value="Dear Parents,"></label></div>
+      <label class="check gfirst" id="gfirstRow" hidden><input type="checkbox" id="gfirst"> Put the greeting above the subject <span class="sub">(e.g. &ldquo;Dear Trustees of &hellip;,&rdquo; then the subject)</span></label>
       <div class="field"><span id="bodyLab">Letter</span>
         <div class="rt-bar" id="rtBar" role="toolbar" aria-label="Formatting">
           <button type="button" data-cmd="bold" aria-label="Bold"><b>B</b></button>
@@ -1463,7 +1477,31 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   }
 
   // ---------- fields ----------
-  const fields = ["date", "ref", "subject", "greet", "body", "close"];
+  const fields = ["date", "ref", "to", "subject", "greet", "body", "close"];
+  // Greeting above or below the subject: the form shows it in the same order as the letter.
+  function setGfirst(on) {
+    $("gfirst").checked = !!on; store.set("f:gfirst", on ? "1" : null);
+    (on ? $("greetSlotTop") : $("greetSlot")).append($("greetField"));
+  }
+  $("gfirst").addEventListener("change", () => { setGfirst($("gfirst").checked); if (typeof render === "function" && view === "preview") render(); });
+  function setTo(v) { $("to").value = v || ""; store.set("f:to", v ? v : null); }
+  // A letter to an outside organisation: addressed-to lines, greeting usually first, and its own reference number series.
+  function setOutside(on, fromUser) {
+    $("outside").checked = !!on; store.set("f:outside", on ? "1" : null);
+    $("toBox").hidden = !on; $("gfirstRow").hidden = !on;
+    if (fromUser && on) {
+      if ($("greet").value.trim() === "Dear Parents,") { $("greet").value = "Dear Sir/Madam,"; store.set("f:greet", $("greet").value); }
+      if (!$("gfirst").checked) setGfirst(true);
+      if (/^CHHS\//.test($("ref").value.trim())) { $("ref").value = ""; store.set("f:ref", null); }
+      $("to").focus();
+    }
+    if (fromUser && !on) {
+      setGfirst(false);
+      if ($("greet").value.trim() === "Dear Sir/Madam,") { $("greet").value = "Dear Parents,"; store.set("f:greet", $("greet").value); }
+    }
+    if (typeof updateSendBtn === "function") updateSendBtn();
+  }
+  $("outside").addEventListener("change", () => setOutside($("outside").checked, true));
   const sliders = { mTop: ["oTop", " mm"], mBot: ["oBot", " mm"], mSide: ["oSide", " mm"], fSize: ["oSize", " pt"] };
   function setSlider(id, v) { $(id).value = v; $(sliders[id][0]).textContent = $(id).value + sliders[id][1]; store.set(id, String($(id).value)); }
   function today() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
@@ -1483,6 +1521,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     $("greet").value = "Dear Parents,"; $("close").value = "Yours sincerely,";
     for (const k of ["greet", "close"]) store.set("f:" + k, null);
     for (const k of ["ref", "subject", "body"]) { $(k).value = ""; store.set("f:" + k, null); }
+    setTo(""); setGfirst(false); setOutside(false);
     $("date").value = today(); store.set("f:date", null);
     editingReq = null; store.set("draftKey", null); updateSendBtn();
   }
@@ -1562,6 +1601,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     $("subject").value = t.subject || ""; $("body").value = t.body || "";
     $("greet").value = t.greet || "Dear Parents,";
     for (const k of ["subject", "body", "greet"]) store.set("f:" + k, $(k).value);
+    setTo(t.to || ""); setOutside(!!(t.outside || t.to)); setGfirst(!!t.gfirst);
     goWrite(() => {
       renderBlanks();
       if (!$("blanksBox").hidden) { note("Fill in the blanks, then check the letter.", "ok"); focusFirstBlank(); }
@@ -1570,7 +1610,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
 
   // ---------- fill in the blanks ----------
   // Every [blank] in the letter gets its own box; the answer replaces that blank everywhere at once.
-  const BLANK_FIELDS = ["subject", "greet", "body", "close"];
+  const BLANK_FIELDS = ["to", "subject", "greet", "body", "close"];
   const PRONOUNS = [["he", "she"], ["him", "her"], ["his", "her"], ["He", "She"], ["Him", "Her"], ["His", "Her"]];
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -1704,7 +1744,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     const body = $("body").value.trim();
     if (!body) { note("Type a letter first, then save it as a template.", "err"); return false; }
     const name = nameInput.value.trim() || $("subject").value.trim() || "My template";
-    const t = { id: uid(), name, subject: $("subject").value.trim(), body, greet: $("greet").value.trim() };
+    const t = { id: uid(), name, subject: $("subject").value.trim(), body, greet: $("greet").value.trim(), to: $("to").value.trim(), gfirst: $("gfirst").checked, outside: $("outside").checked };
     if (scriptOn() && shareBox.checked) {
       if (!store.get("pin")) { note("To share with all staff, add the staff PIN in Settings first. Or untick sharing to keep it on this device.", "err"); return false; }
       note("Sharing with all staff…");
@@ -1808,10 +1848,19 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     } else {
       blocks.push({ h: lh * 2, draw(ctx, y) { refDraw(ctx, m.side, y + fs); text(ctx, dateTxt, PW - m.side, y, false, "right"); } });
     }
-    const subj = val("subject").trim();
+    // Who the letter is addressed to (outside organisations), one line per line typed.
+    const toLines = (!$("outside").checked ? "" : $("to").value).replace(/\r/g, "").split("\n").map((l) => l.trim()).filter(Boolean);
+    if (toLines.length) {
+      meas.font = font(fs, false);
+      const ls = toLines.flatMap((l) => wrap(meas, l, maxW).filter(Boolean));
+      ls.forEach((ln, i) => blocks.push({ h: lh + (i === ls.length - 1 ? lh * 0.6 : 0), draw(ctx, y) { text(ctx, ln, m.side, y); } }));
+    }
+    const subj = val("subject").trim(), greet = $("greet").value.trim();
+    const greetBlock = () => { meas.font = font(fs, false); const ls = wrap(meas, greet, maxW).filter(Boolean); ls.forEach((ln, i) => blocks.push({ h: lh + (i === ls.length - 1 ? lh * 0.6 : 0), draw(ctx, y) { text(ctx, ln, m.side, y); } })); };
+    const gFirst = $("outside").checked && $("gfirst").checked;
+    if (greet && gFirst) greetBlock();
     if (subj) { meas.font = font(fs, true); const ls = wrap(meas, "Subject: " + subj, maxW); ls.forEach((ln, i) => blocks.push({ h: lh + (i === ls.length - 1 ? lh * 0.6 : 0), draw(ctx, y) { text(ctx, ln, m.side, y, true); } })); }
-    const greet = $("greet").value.trim();
-    if (greet) blocks.push({ h: lh * 1.6, draw(ctx, y) { text(ctx, greet, m.side, y); } });
+    if (greet && !gFirst) greetBlock();
     for (const b of richBlocks(val("body"), m.side, maxW, fs, lh)) blocks.push(b);
     // Signature block: one column per signer, up to three per row, kept together on one page
     const sigH = 22 * MM, closeTxt = $("close").value.trim();
@@ -1899,7 +1948,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   // ---------- checks before sending ----------
   function checks() {
     const warns = [];
-    const all = [$("subject").value, bodyText($("body").value), $("greet").value, $("close").value].join("\n");
+    const all = [$("to").value, $("subject").value, bodyText($("body").value), $("greet").value, $("close").value].join("\n");
     const blanks = Array.from(new Set(all.match(/\[[^\]\n]{0,60}\]/g) || []));
     if (blanks.length) warns.push("Parts in square brackets still need filling in: " + blanks.slice(0, 4).join(", ") + (blanks.length > 4 ? " and more" : "") + ".");
     const toHM = needsApproval(), sm = getSignMode(), staffSend = toHM && isStaff();
@@ -2056,7 +2105,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   // ----- lock and unlock -----
   const locked = () => scriptOn() && !store.get("pin");
   const WIPE = ["pin", "role", "section", "sectionName", "hmTitle", "hms", "cosign", "signMode", "softLocked", "lhCache", "lhv", "fitFor", "dateSlot", "sharedTpl", "myreqs", "outbox", "draftKey",
-                "f:subject", "f:body", "f:ref", "f:greet", "f:close", "seenApproved", "hmpin", "askT"];
+                "f:subject", "f:body", "f:ref", "f:greet", "f:close", "f:to", "f:gfirst", "f:outside", "seenApproved", "hmpin", "askT"];
   // The owner's name, email and signatures stay on the phone through a lock, so they never need adding again.
   // Only five wrong PINs in a row (someone else trying to get in) removes them too.
   const OWNER = ["signers", "signedBy", "sg", "myname", "myemail", "personId"];
@@ -2260,7 +2309,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   };
 
   // ----- reference numbers (given by the school link, only to final letters) -----
-  const autoRef = () => scriptOn();
+  const autoRef = () => scriptOn() && !$("outside").checked;
   function draftKey() {
     let k = store.get("draftKey");
     if (!k) { k = "d-" + rid(); store.set("draftKey", k); }
@@ -2289,7 +2338,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       : review && !review.approved ? "Check the letter. " + (review.asTeacher ? "Sign it" : "Approve it") + ", or send it back with a note at the bottom."
       : mode === "share" ? "The letterhead and signatures are part of the PDF."
       : "Only the text and signatures print. The faded letterhead is shown here only to check the fit. Use A4 letterhead paper and print at 100% (Actual size).";
-    $("ref").placeholder = autoRef() ? "Automatic" : "Optional";
+    $("ref").placeholder = $("outside").checked ? "Your series, e.g. CHHS/TRUST/04" : autoRef() ? "Automatic" : "Optional";
     $("refHint").hidden = !(autoRef() && !$("ref").value.trim());
     $("reviewPanel").hidden = !(review && !review.approved);
     if (review) $("sendBackBtn").textContent = "Send back to " + review.from;
@@ -2315,9 +2364,10 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   $("backFromLetters").addEventListener("click", goWrite);
 
   // The parts of a letter that travel between phones
-  const letterFields = () => ({ subject: $("subject").value, body: $("body").value, greet: $("greet").value, close: $("close").value, ref: $("ref").value, date: $("date").value, mode });
+  const letterFields = () => ({ outside: $("outside").checked, to: $("outside").checked ? $("to").value : "", gfirst: $("outside").checked && $("gfirst").checked, subject: $("subject").value, body: $("body").value, greet: $("greet").value, close: $("close").value, ref: $("ref").value, date: $("date").value, mode });
   function loadLetter(L) {
     for (const k of ["subject", "body", "greet", "close", "ref"]) { $(k).value = L[k] || ""; store.set("f:" + k, $(k).value); }
+    setTo(L.to || ""); setOutside(!!L.outside); setGfirst(!!L.gfirst);
     if (!$("greet").value) $("greet").value = "Dear Parents,";
     if (!$("close").value) $("close").value = "Yours sincerely,";
     $("date").value = L.date || today();
@@ -2566,6 +2616,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   // ---------- start ----------
   (async function init() {
     for (const k of fields) { const v = store.get("f:" + k); if (v != null) $(k).value = v; }
+    setOutside(store.get("f:outside") === "1"); setGfirst(store.get("f:gfirst") === "1");
     for (const id in sliders) { const v = store.get(id); if (v != null) $(id).value = v; $(sliders[id][0]).textContent = $(id).value + sliders[id][1]; }
     // The date always starts as today, so an old draft never goes out with last week's date.
     $("date").value = today(); store.set("f:date", null);
