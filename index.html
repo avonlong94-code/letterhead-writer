@@ -14,7 +14,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Noto+Serif:wght@400;700&family=Noto+Serif+Devanagari:wght@400;700&family=Noto+Serif+Gujarati:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Gujarati:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Serif+Devanagari:wght@400;700&family=Noto+Serif+Gujarati:wght@400;700&display=swap">
 <style>
 /* Layout: one narrow phone column, one screen at a time (Write, Check and send, Settings), with a fixed bottom bar holding the next action. */
 :root {
@@ -64,6 +64,23 @@ input[type=text], input[type=date], input[type=time], input[type=password], inpu
   font: inherit; font-size: 17px; color: var(--ink); background: var(--surface);
   border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; width: 100%; min-height: 52px; }
 textarea { min-height: 46vh; resize: vertical; line-height: 1.6; font-family: var(--f-letter); font-size: 17px; }
+.rt-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.rt-bar button, .rt-bar select, .rt-panel button { min-height: 40px; min-width: 40px; padding: 4px 10px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: .95rem; cursor: pointer; }
+.rt-bar select { width: auto; padding: 4px 8px; }
+.rt-panel button.on, .rt-bar button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.rt-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 6px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--accent-soft); font-size: .95rem; }
+.rt-panel label { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+.rt-panel select { width: auto; min-height: 40px; }
+.rt-panel .btn { flex: 0 0 auto; min-height: 40px; }
+.rt-panel button.warn { color: var(--warn); }
+.rt-ed { min-height: 46vh; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink);
+  font-family: var(--f-letter); font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; outline: none; }
+.rt-ed:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+.rt-ed.empty::before { content: attr(data-ph); color: var(--muted); opacity: .8; pointer-events: none; display: block; height: 0; }
+.rt-ed ul, .rt-ed ol { margin: 0; padding-left: 1.6em; }
+.rt-ed table { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: .95em; }
+.rt-ed td, .rt-ed th { border: 1px solid var(--muted); padding: 4px 6px; vertical-align: top; min-width: 2.5em; }
+.rt-ed font[size="2"] { font-size: 14.5px; } .rt-ed font[size="3"] { font-size: 17px; } .rt-ed font[size="4"] { font-size: 20.5px; } .rt-ed font[size="5"] { font-size: 24.5px; }
 textarea::placeholder, input::placeholder { color: var(--muted); opacity: .8; }
 input:focus-visible, textarea:focus-visible, button:focus-visible, summary:focus-visible, .tile:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
 
@@ -272,9 +289,43 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
       </div>
       <label class="field"><span>Subject</span><input type="text" id="subject" placeholder="e.g. Diwali holidays"></label>
       <label class="field"><span>Greeting</span><input type="text" id="greet" value="Dear Parents,"></label>
-      <label class="field"><span>Letter</span>
-        <textarea id="body" placeholder="Type the letter here. Leave an empty line between paragraphs.&#10;&#10;Hindi, Marathi and Gujarati typing works too."></textarea>
-      </label>
+      <div class="field"><span id="bodyLab">Letter</span>
+        <div class="rt-bar" id="rtBar" role="toolbar" aria-label="Formatting">
+          <button type="button" data-cmd="bold" aria-label="Bold"><b>B</b></button>
+          <button type="button" data-cmd="italic" aria-label="Italic"><i>I</i></button>
+          <button type="button" data-cmd="underline" aria-label="Underline"><u>U</u></button>
+          <button type="button" id="rtFontBtn" aria-haspopup="true">Serif &#9662;</button>
+          <button type="button" id="rtSizeBtn" aria-haspopup="true">Normal &#9662;</button>
+          <button type="button" data-cmd="insertUnorderedList" aria-label="Bullet list">&bull; List</button>
+          <button type="button" data-cmd="insertOrderedList" aria-label="Numbered list">1. List</button>
+          <button type="button" data-cmd="center" aria-label="Centre the line">Centre</button>
+          <button type="button" id="rtTableBtn">Table</button>
+        </div>
+        <div class="rt-panel" id="rtFontPanel" hidden>
+          <button type="button" data-font="" style="font-family:'Noto Serif',serif">Serif</button>
+          <button type="button" data-font="Noto Sans" style="font-family:'Noto Sans',sans-serif">Sans</button>
+          <button type="button" data-font="EB Garamond" style="font-family:'EB Garamond',serif">Garamond</button>
+        </div>
+        <div class="rt-panel" id="rtSizePanel" hidden>
+          <button type="button" data-size="2" style="font-size:14px">Small</button>
+          <button type="button" data-size="3">Normal</button>
+          <button type="button" data-size="4" style="font-size:19px">Large</button>
+          <button type="button" data-size="5" style="font-size:22px;font-weight:700">Heading</button>
+        </div>
+        <div class="rt-panel" id="rtTablePanel" hidden>
+          <label>Rows <select id="rtRows"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option></select></label>
+          <label>Columns <select id="rtCols"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+          <button type="button" class="btn primary" id="rtInsertTable">Insert table</button>
+        </div>
+        <div class="rt-panel" id="rtTableTools" hidden>
+          <button type="button" data-op="addRow">+ Row</button><button type="button" data-op="addCol">+ Column</button>
+          <button type="button" data-op="delRow">&minus; Row</button><button type="button" data-op="delCol">&minus; Column</button>
+          <button type="button" data-op="delTable" class="warn">Remove table</button>
+        </div>
+        <div id="bodyEd" class="rt-ed empty" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="bodyLab" spellcheck="true"
+             data-ph="Type the letter here. Press Enter twice between paragraphs. Hindi, Marathi and Gujarati typing works too."></div>
+        <textarea id="body" hidden></textarea>
+      </div>
       <label class="field"><span>Closing</span><input type="text" id="close" value="Yours sincerely,"></label>
       <div class="field" id="signModeBox" hidden><span>Who signs it?</span>
         <div class="seg seg3" role="radiogroup" aria-label="Who signs it?">
@@ -1004,6 +1055,413 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     note("Signatures removed from this phone.", "ok");
   });
 
+  // ---------- formatted letter text ----------
+  // The letter is kept as a small, safe piece of HTML: lines (div), bold, italic, underline, font, size, centred lines,
+  // lists and tables. Anything else (from paste or another phone) is cleaned away. Plain text from older letters and
+  // templates is turned into this format when it is loaded.
+  const RT_FONTS = { "Noto Sans": "sans", "EB Garamond": "garamond" };
+  const RT_SIZES = { "2": 0.85, "3": 1, "4": 1.2, "5": 1.45 };
+  const escHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const looksRich = (s) => /^\s*<(div|p|ul|ol|table|h[1-6])[\s>]/i.test(s || "");
+  function plainToHtml(s) {
+    return String(s || "").replace(/\r/g, "").split("\n").map((l) => l.trim() ? "<div>" + escHtml(l) + "</div>" : "<div><br></div>").join("");
+  }
+  const BLOCK = /^(DIV|P|H[1-6]|BLOCKQUOTE|SECTION|ARTICLE|HEADER|FOOTER|PRE|UL|OL|LI|TABLE|TBODY|THEAD|TFOOT|TR|TD|TH|CENTER)$/;
+  function styleOf(el) {
+    const t = el.tagName, st = el.style || {}, o = {};
+    if (t === "B" || t === "STRONG" || t === "TH" || /^(bold|bolder|[6-9]00)$/.test(st.fontWeight || "")) o.b = true;
+    if (t === "I" || t === "EM" || st.fontStyle === "italic") o.i = true;
+    if (t === "U" || /underline/.test(st.textDecoration || st.textDecorationLine || "")) o.u = true;
+    if (/^H[1-3]$/.test(t)) { o.b = true; o.s = "5"; }
+    if (/^H[4-6]$/.test(t)) { o.b = true; o.s = "4"; }
+    const face = (t === "FONT" && el.getAttribute("face")) || st.fontFamily || "";
+    if (face) { const f = Object.keys(RT_FONTS).find((k) => face.replace(/["']/g, "").toLowerCase().startsWith(k.toLowerCase())); o.f = f || "serif"; }
+    const sz = t === "FONT" ? el.getAttribute("size") : "";
+    if (sz && RT_SIZES[sz]) o.s = sz;
+    else if (st.fontSize) {
+      const m = /^([\d.]+)(px|pt|em|rem|%)$/.exec(st.fontSize), px = m ? (+m[1]) * ({ px: 1, pt: 1.333, em: 16, rem: 16, "%": 0.16 })[m[2]] : 0;
+      if (px) o.s = px < 14 ? "2" : px < 18.5 ? "3" : px < 23 ? "4" : "5";
+      else if (/small/.test(st.fontSize)) o.s = "2"; else if (/large/.test(st.fontSize)) o.s = st.fontSize === "large" ? "4" : "5";
+    }
+    return o;
+  }
+  function wrapInline(html, o) {
+    if (!html) return html;
+    if (o.s && o.s !== "3") html = '<font size="' + o.s + '">' + html + "</font>";
+    if (o.f && o.f !== "serif") html = '<font face="' + o.f + '">' + html + "</font>";
+    if (o.u) html = "<u>" + html + "</u>";
+    if (o.i) html = "<i>" + html + "</i>";
+    if (o.b) html = "<b>" + html + "</b>";
+    return html;
+  }
+  // Inline content of a node, with blocks inside it turned into line breaks.
+  function inlineOf(node) {
+    let out = "";
+    node.childNodes.forEach((c) => {
+      if (c.nodeType === 3) { out += escHtml(c.nodeValue.replace(/\u200B/g, "").replace(/[\r\n\t]+/g, " ")); return; }
+      if (c.nodeType !== 1 || /^(SCRIPT|STYLE|TEMPLATE|META|LINK|TITLE|IMG|SVG|OBJECT|IFRAME|INPUT|BUTTON|SELECT|TEXTAREA)$/.test(c.tagName)) return;
+      if (c.tagName === "BR") { out += "<br>"; return; }
+      let inner = inlineOf(c);
+      if (BLOCK.test(c.tagName) && inner && !/<br>$/.test(out) && out) out += "<br>";
+      out += wrapInline(inner, styleOf(c));
+      if (BLOCK.test(c.tagName) && inner && !/<br>$/.test(inner)) out += "<br>";
+    });
+    return out;
+  }
+  const trimBr = (s) => s.replace(/^(<br>)+/, "").replace(/(<br>)+$/, "");
+  function alignOf(el) {
+    const a = (el.style && el.style.textAlign) || el.getAttribute("align") || (el.tagName === "CENTER" ? "center" : "");
+    return /center/.test(a) ? "center" : /right/.test(a) ? "right" : "";
+  }
+  function cleanHtml(html) {
+    const tpl = document.createElement("template"); tpl.innerHTML = String(html || "");
+    const out = []; let buf = "";
+    const flush = () => { if (buf) { out.push("<div>" + buf + "</div>"); buf = ""; } };
+    const line = (inner, align) => out.push("<div" + (align ? ' style="text-align:' + align + '"' : "") + ">" + (inner || "<br>") + "</div>");
+    const hasBlock = (el) => Array.from(el.children).some((c) => BLOCK.test(c.tagName));
+    function blocks(node, align, inherit) {
+      node.childNodes.forEach((c) => {
+        if (c.nodeType === 3) { const v = c.nodeValue.replace(/\u200B/g, ""); if (v.trim() || buf) buf += escHtml(v.replace(/[\r\n\t]+/g, " ")); return; }
+        if (c.nodeType !== 1 || /^(SCRIPT|STYLE|TEMPLATE|META|LINK|TITLE|IMG|SVG|OBJECT|IFRAME|INPUT|BUTTON|SELECT|TEXTAREA|XML)$/.test(c.tagName)) return;
+        const t = c.tagName;
+        if (t === "BR") { if (buf) flush(); else line("", align); return; }
+        if (t === "UL" || t === "OL") {
+          flush();
+          const items = Array.from(c.children).filter((x) => x.tagName === "LI").map((li) => trimBr(inlineOf(li)));
+          if (items.length) out.push("<" + t.toLowerCase() + ">" + items.map((x) => "<li>" + (x || "<br>") + "</li>").join("") + "</" + t.toLowerCase() + ">");
+          return;
+        }
+        if (t === "TABLE") {
+          flush();
+          const rows = Array.from(c.querySelectorAll("tr")).filter((tr) => tr.closest("table") === c)
+            .map((tr) => Array.from(tr.children).filter((x) => /^T[DH]$/.test(x.tagName)).slice(0, 8)
+              .map((td) => wrapInline(trimBr(inlineOf(td)), td.tagName === "TH" ? { b: true } : {}))).filter((r) => r.length);
+          if (rows.length) {
+            const n = Math.max(...rows.map((r) => r.length));
+            out.push("<table><tbody>" + rows.slice(0, 60).map((r) => "<tr>" + Array.from({ length: n }, (_, i) => "<td>" + (r[i] || "<br>") + "</td>").join("") + "</tr>").join("") + "</tbody></table>");
+          }
+          return;
+        }
+        if (BLOCK.test(t)) {
+          flush();
+          const a = alignOf(c) || align, st = Object.assign({}, inherit || {}, styleOf(c));
+          if (hasBlock(c)) { blocks(c, a, st); flush(); return; }
+          const inner = inlineOf(c);
+          const parts = inner.replace(/(<br>)$/, "").split("<br>");
+          // A block styled as a whole (such as a heading) keeps its style on each of its lines.
+          parts.forEach((p) => line(wrapInline(p, st), a));
+          return;
+        }
+        // Inline element at this level
+        if (hasBlock(c)) { flush(); blocks(c, align, Object.assign({}, inherit || {}, styleOf(c))); flush(); return; }
+        buf += wrapInline(inlineOf(c), Object.assign({}, inherit || {}, styleOf(c)));
+      });
+    }
+    blocks(tpl.content, "");
+    flush();
+    // Drop empty lines at the start and end, and keep at most one empty line in a row.
+    const empty = (s) => s === "<div><br></div>";
+    const res = [];
+    for (const b of out) { if (empty(b) && (!res.length || empty(res[res.length - 1]))) continue; res.push(b); }
+    while (res.length && empty(res[res.length - 1])) res.pop();
+    const html2 = res.join("");
+    const tmp = document.createElement("template"); tmp.innerHTML = html2;
+    return tmp.content.textContent.trim() || /<table/.test(html2) ? html2 : "";
+  }
+  const toRich = (v) => !v ? "" : looksRich(v) ? cleanHtml(v) : cleanHtml(plainToHtml(v));
+  // The letter as plain text: for checks, previews and emails.
+  function bodyText(v) {
+    if (!looksRich(v)) return String(v || "");
+    const tpl = document.createElement("template");
+    tpl.innerHTML = String(v).replace(/<br\s*\/?>/gi, "\n").replace(/<\/(div|p|li|tr|h\d)>/gi, "$&\n").replace(/<\/t[dh]>/gi, " | $&");
+    return tpl.content.textContent.replace(/ \| \n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  }
+
+  // ----- the editor -----
+  const ed = $("bodyEd"), ta = $("body");
+  const taValue = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value");
+  try { document.execCommand("styleWithCSS", false, false); } catch (e) {}
+  function edEmpty() { ed.classList.toggle("empty", !ed.textContent.replace(/\u200B/g, "").trim() && !ed.querySelector("table,li")); }
+  function loadEditor(h) { ed.innerHTML = h || ""; edEmpty(); updateBar(); }
+  // Setting the letter text from anywhere (templates, drafts, blanks, imports, approvals) also updates the editor.
+  Object.defineProperty(ta, "value", {
+    configurable: true,
+    get() { return taValue.get.call(ta); },
+    set(v) { const h = toRich(String(v == null ? "" : v)); taValue.set.call(ta, h); loadEditor(h); }
+  });
+  ta.focus = () => ed.focus();
+  function syncFromEditor() {
+    edEmpty();
+    const h = cleanHtml(ed.innerHTML);
+    if (h === taValue.get.call(ta)) return;
+    taValue.set.call(ta, h);
+    ta.dispatchEvent(new Event("input"));
+  }
+  let syncT = null;
+  ed.addEventListener("input", () => { edEmpty(); clearTimeout(syncT); syncT = setTimeout(syncFromEditor, 250); });
+  ed.addEventListener("blur", () => { clearTimeout(syncT); syncFromEditor(); ta.dispatchEvent(new Event("change")); });
+  // Pasted text keeps bold, lists and tables, and nothing else.
+  ed.addEventListener("paste", (e) => {
+    const cd = e.clipboardData; if (!cd) return;
+    e.preventDefault();
+    const html = cd.getData("text/html"), txt = cd.getData("text/plain");
+    let clean = html ? cleanHtml(html.replace(/<!--[\s\S]*?-->/g, "")) : "";
+    if (!clean && txt) {
+      const lines = txt.replace(/\r/g, "").split("\n");
+      clean = lines.length === 1 ? escHtml(lines[0]) : cleanHtml(plainToHtml(txt));
+    }
+    if (clean) document.execCommand("insertHTML", false, clean);
+    syncFromEditor();
+  });
+  ed.addEventListener("drop", (e) => e.preventDefault());
+
+  // Keep the selection while a toolbar control is used.
+  let savedRange = null;
+  document.addEventListener("selectionchange", () => {
+    const sel = getSelection();
+    if (sel.rangeCount && ed.contains(sel.anchorNode)) { savedRange = sel.getRangeAt(0).cloneRange(); updateBar(); }
+  });
+  function restoreSel() {
+    ed.focus({ preventScroll: true });
+    if (savedRange && ed.contains(savedRange.startContainer)) { const sel = getSelection(); sel.removeAllRanges(); sel.addRange(savedRange); }
+  }
+  // On an empty line a browser forgets a chosen style as soon as another one is chosen, so the line is styled directly.
+  const STYLE_CMDS = { bold: 1, italic: 1, underline: 1, fontName: 1, fontSize: 1 };
+  function styleEmptyLine(name, arg) {
+    const sel = getSelection(); if (!sel.rangeCount || !sel.isCollapsed) return false;
+    let n = sel.anchorNode; if (n.nodeType === 3) n = n.parentNode;
+    if (!ed.contains(n) && n !== ed) return false;
+    let block = n; while (block !== ed && !/^(DIV|LI|TD|TH|P)$/.test(block.tagName)) block = block.parentNode;
+    if (block.textContent.replace(/\u200B/g, "").trim() || block.querySelector("table,ul,ol,div")) return false;
+    const st = {};
+    for (let x = n; x && x !== block.parentNode && x !== ed.parentNode; x = x.parentNode) {
+      const o = styleOf(x); for (const k in o) if (st[k] === undefined) st[k] = o[k];
+    }
+    if (name === "bold") st.b = !st.b; if (name === "italic") st.i = !st.i; if (name === "underline") st.u = !st.u;
+    if (name === "fontName") st.f = RT_FONTS[arg] ? arg : "serif";
+    if (name === "fontSize") st.s = arg;
+    const html = wrapInline("\u200B", st) || "\u200B";
+    if (block === ed) { ed.innerHTML = "<div>" + html + "</div>"; block = ed.firstChild; } else block.innerHTML = html;
+    let leaf = block; while (leaf.lastChild) leaf = leaf.lastChild;
+    const r = document.createRange(); r.setStart(leaf, leaf.nodeType === 3 ? leaf.length : 0); r.collapse(true);
+    sel.removeAllRanges(); sel.addRange(r); savedRange = r.cloneRange();
+    return true;
+  }
+  function cmd(name, arg) {
+    restoreSel();
+    if (!(STYLE_CMDS[name] && styleEmptyLine(name, arg))) document.execCommand(name, false, arg);
+    syncFromEditor(); updateBar();
+  }
+  const q = (n) => { try { return document.queryCommandState(n); } catch (e) { return false; } };
+  function currentCell() {
+    const sel = getSelection(); if (!sel.rangeCount) return null;
+    let n = sel.anchorNode; if (n && n.nodeType === 3) n = n.parentNode;
+    const td = n && n.closest ? n.closest("td,th") : null;
+    return td && ed.contains(td) ? td : null;
+  }
+  function updateBar() {
+    document.querySelectorAll("#rtBar [data-cmd]").forEach((b) => {
+      const c = b.dataset.cmd, on = c === "center" ? q("justifyCenter") : q(c);
+      b.classList.toggle("on", !!on); b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    const sel = getSelection();
+    if (sel.rangeCount && ed.contains(sel.anchorNode)) {
+      let n = sel.anchorNode; if (n.nodeType === 3) n = n.parentNode;
+      let face = "", size = "3";
+      for (let x = n; x && x !== ed; x = x.parentNode) {
+        if (x.tagName === "FONT") { if (!face && x.getAttribute("face")) face = x.getAttribute("face"); if (size === "3" && x.getAttribute("size")) size = x.getAttribute("size"); }
+      }
+      const fn = { "Noto Sans": "Sans", "EB Garamond": "Garamond" }[face] || "Serif", sn = { "2": "Small", "4": "Large", "5": "Heading" }[size] || "Normal";
+      $("rtFontBtn").textContent = fn + " \u25BE"; $("rtSizeBtn").textContent = sn + " \u25BE";
+      document.querySelectorAll("#rtFontPanel [data-font]").forEach((x) => x.classList.toggle("on", (x.dataset.font || "Serif") === (RT_FONTS[face] ? face : "Serif")));
+      document.querySelectorAll("#rtSizePanel [data-size]").forEach((x) => x.classList.toggle("on", x.dataset.size === (RT_SIZES[size] ? size : "3")));
+    }
+    $("rtTableTools").hidden = !currentCell();
+  }
+  // Toolbar buttons do not take the focus, so the cursor and any chosen style stay in the letter.
+  ["rtBar", "rtTableTools", "rtFontPanel", "rtSizePanel"].forEach((id) => {
+    $(id).addEventListener("pointerdown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
+    $(id).addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
+  });
+  const panels = ["rtFontPanel", "rtSizePanel", "rtTablePanel"];
+  const togglePanel = (id) => panels.forEach((x) => { $(x).hidden = x === id ? !$(x).hidden : true; });
+  document.querySelectorAll("#rtBar [data-cmd]").forEach((b) => b.addEventListener("click", () => {
+    const c = b.dataset.cmd;
+    if (c === "center") cmd(q("justifyCenter") ? "justifyLeft" : "justifyCenter"); else cmd(c);
+  }));
+  $("rtFontBtn").addEventListener("click", () => togglePanel("rtFontPanel"));
+  $("rtSizeBtn").addEventListener("click", () => togglePanel("rtSizePanel"));
+  $("rtTableBtn").addEventListener("click", () => togglePanel("rtTablePanel"));
+  document.querySelectorAll("#rtFontPanel [data-font]").forEach((b) => b.addEventListener("click", () => { $("rtFontPanel").hidden = true; cmd("fontName", b.dataset.font || "Noto Serif"); }));
+  document.querySelectorAll("#rtSizePanel [data-size]").forEach((b) => b.addEventListener("click", () => { $("rtSizePanel").hidden = true; cmd("fontSize", b.dataset.size); }));
+  $("rtInsertTable").addEventListener("click", () => {
+    const r = +$("rtRows").value, c = +$("rtCols").value;
+    const row = "<tr>" + "<td><br></td>".repeat(c) + "</tr>";
+    $("rtTablePanel").hidden = true;
+    restoreSel();
+    if (!ed.contains(getSelection().anchorNode)) { const rg = document.createRange(); rg.selectNodeContents(ed); rg.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(rg); }
+    document.execCommand("insertHTML", false, "<table><tbody>" + row.repeat(r) + "</tbody></table><div><br></div>");
+    syncFromEditor();
+    note("Table added. Tap a cell to type in it. Use the buttons above to add or remove rows and columns.", "ok");
+    updateBar();
+  });
+  function tableOp(op) {
+    const td = currentCell(); if (!td) return;
+    const tr = td.parentNode, table = td.closest("table"), i = td.cellIndex;
+    if (op === "addRow") { const n = tr.cloneNode(false); for (let k = 0; k < tr.cells.length; k++) n.insertCell().innerHTML = "<br>"; tr.after(n); }
+    if (op === "addCol") { if (tr.cells.length >= 8) { note("A table can have up to 8 columns.", "err"); return; } Array.from(table.rows).forEach((r) => { const c = r.insertCell(Math.min(i + 1, r.cells.length)); c.innerHTML = "<br>"; }); }
+    if (op === "delRow") { if (table.rows.length === 1) table.remove(); else tr.remove(); }
+    if (op === "delCol") { if (tr.cells.length === 1) table.remove(); else Array.from(table.rows).forEach((r) => { if (r.cells[i]) r.deleteCell(i); }); }
+    if (op === "delTable") table.remove();
+    syncFromEditor(); updateBar();
+  }
+  document.querySelectorAll("#rtTableTools [data-op]").forEach((b) => b.addEventListener("click", () => tableOp(b.dataset.op)));
+
+  // ----- laying out formatted text on the page -----
+  const FAMS = {
+    serif: SERIF,
+    sans: '"Noto Sans", "Noto Sans Devanagari", "Noto Sans Gujarati", Arial, sans-serif',
+    garamond: '"EB Garamond", "Noto Serif Devanagari", "Noto Serif Gujarati", Georgia, serif'
+  };
+  const runFont = (st, px) => (st.i ? "italic " : "") + (st.b ? "700 " : "400 ") + px + "px " + (FAMS[st.f] || SERIF);
+  // A list of lines, each a list of runs {t, st} or a line break.
+  function runsOf(node, st, out) {
+    node.childNodes.forEach((c) => {
+      if (c.nodeType === 3) { if (c.nodeValue) out.push({ t: c.nodeValue, st }); return; }
+      if (c.nodeType !== 1) return;
+      if (c.tagName === "BR") { out.push({ br: true }); return; }
+      const o = styleOf(c), s2 = Object.assign({}, st);
+      if (o.b) s2.b = true; if (o.i) s2.i = true; if (o.u) s2.u = true; if (o.f) s2.f = o.f; if (o.s) s2.s = o.s;
+      runsOf(c, s2, out);
+    });
+    return out;
+  }
+  // Wrap runs into lines that fit maxW. Each line: { items: [{t, st, x, w}], w, px }.
+  function wrapRuns(ctx, runs, maxW, fs) {
+    const lines = []; let cur = [], w = 0, word = null;
+    const words = [];
+    for (const r of runs) {
+      if (r.br) { words.push({ br: true }); word = null; continue; }
+      for (const piece of r.t.split(/(\s+)/)) {
+        if (!piece) continue;
+        if (/^\s+$/.test(piece)) { words.push({ space: true, pieces: [{ t: " ", st: r.st }] }); word = null; }
+        else { if (!word) { word = { pieces: [] }; words.push(word); } word.pieces.push({ t: piece, st: r.st }); }
+      }
+    }
+    const px = (st) => Math.round(fs * (RT_SIZES[st.s] || 1));
+    const measure = (p) => { ctx.font = runFont(p.st, px(p.st)); return ctx.measureText(p.t).width; };
+    const endLine = () => {
+      while (cur.length && cur[cur.length - 1].space) { w -= cur[cur.length - 1].w; cur.pop(); }
+      lines.push({ items: cur, w, px: cur.length ? Math.max(...cur.map((p) => px(p.st))) : fs });
+      cur = []; w = 0;
+    };
+    for (const wd of words) {
+      if (wd.br) { endLine(); continue; }
+      const ps = wd.pieces.map((p) => Object.assign({}, p, { w: measure(p), space: !!wd.space }));
+      const ww = ps.reduce((a, p) => a + p.w, 0);
+      if (wd.space) { if (cur.length) { ps.forEach((p) => { cur.push(p); w += p.w; }); } continue; }
+      if (w + ww > maxW && cur.length) endLine();
+      if (ww > maxW) {
+        // A word wider than the line: break it by letters.
+        for (const p of ps) for (const ch of Array.from(p.t)) {
+          const c = Object.assign({}, p, { t: ch }); c.w = measure(c);
+          if (w + c.w > maxW && cur.length) endLine();
+          cur.push(c); w += c.w;
+        }
+        continue;
+      }
+      ps.forEach((p) => { cur.push(p); w += p.w; });
+    }
+    if (cur.length || !lines.length) endLine();
+    return lines;
+  }
+  function drawRunLine(ctx, line, x, base, maxW, align) {
+    let xx = x + (align === "center" ? (maxW - line.w) / 2 : align === "right" ? maxW - line.w : 0);
+    ctx.fillStyle = "#111"; ctx.textAlign = "left";
+    for (const p of line.items) {
+      const pxs = Math.round((RT_SIZES[p.st.s] || 1) * line.base);
+      ctx.font = runFont(p.st, pxs);
+      ctx.fillText(p.t, xx, base);
+      if (p.st.u && p.t.trim()) ctx.fillRect(xx, base + pxs * 0.14, p.w, Math.max(1, pxs * 0.06));
+      xx += p.w;
+    }
+  }
+  // Blocks for the page: lines of text (body: true), small gaps, and table rows.
+  function richBlocks(html, x0, maxW, fs, lh) {
+    const tpl = document.createElement("template"); tpl.innerHTML = toRich(html);
+    const meas = document.createElement("canvas").getContext("2d");
+    const blocks = [];
+    const gap = (h) => blocks.push({ body: true, gap: true, h, draw() {} });
+    const textLines = (runs, indent, align, marker) => {
+      const lines = wrapRuns(meas, runs, maxW - indent, fs);
+      lines.forEach((ln, k) => {
+        ln.base = fs;
+        const h = Math.round(ln.px * 1.5);
+        blocks.push({ body: true, h, draw(ctx, y) {
+          const base = y + ln.px;
+          if (k === 0 && marker) { ctx.font = runFont({}, fs); ctx.fillStyle = "#111"; ctx.textAlign = "right"; ctx.fillText(marker, x0 + indent - 1.6 * MM, base); ctx.textAlign = "left"; }
+          drawRunLine(ctx, ln, x0 + indent, base, maxW - indent, align);
+        } });
+      });
+    };
+    for (const el of Array.from(tpl.content.children)) {
+      const t = el.tagName;
+      if (t === "DIV") {
+        const runs = runsOf(el, {}, []).filter((r) => r.br || r.t);
+        const textNow = runs.some((r) => r.t && r.t.trim());
+        if (!textNow) { gap(lh * 0.6); continue; }
+        // Line breaks inside one line split it; an empty part becomes a small gap.
+        let part = [];
+        const flushPart = () => { if (part.some((r) => r.t.trim())) textLines(part, 0, alignOf(el)); else if (part.length) gap(lh * 0.6); part = []; };
+        runs.forEach((r) => { if (r.br) flushPart(); else part.push(r); });
+        flushPart();
+      } else if (t === "UL" || t === "OL") {
+        Array.from(el.children).forEach((li, n) => textLines(runsOf(li, {}, []).map((r) => r.br ? { t: " ", st: {} } : r), 7 * MM, "", t === "UL" ? "•" : (n + 1) + "."));
+      } else if (t === "TABLE") {
+        const rows = Array.from(el.querySelectorAll("tr")).map((tr) => Array.from(tr.cells));
+        const n = Math.max(...rows.map((r) => r.length)), pad = 1.8 * MM, cfs = Math.round(fs * 0.95);
+        // Column widths: each at least its longest word, then shared in proportion to how much text it has.
+        const minW = Array(n).fill(4 * MM), want = Array(n).fill(4 * MM);
+        rows.forEach((r) => r.forEach((td, i) => {
+          for (const ln of wrapRuns(meas, runsOf(td, {}, []), 1e9, cfs)) {
+            want[i] = Math.max(want[i], ln.w + 2 * pad);
+            for (const p of ln.items) if (!p.space) minW[i] = Math.max(minW[i], Math.min(p.w + 2 * pad, maxW / n));
+          }
+        }));
+        let widths = minW.slice();
+        const minSum = widths.reduce((a, b) => a + b, 0);
+        if (minSum > maxW) widths = widths.map((w) => w * maxW / minSum);
+        else {
+          const extra = maxW - minSum, need = want.map((w, i) => Math.max(0, w - minW[i])), needSum = need.reduce((a, b) => a + b, 0);
+          if (needSum >= extra) widths = widths.map((w, i) => w + extra * need[i] / needSum);
+          else widths = widths.map((w, i) => w + need[i] + (extra - needSum) / n);
+        }
+        gap(lh * 0.3);
+        rows.forEach((r) => {
+          const cells = widths.map((w, i) => {
+            const td = r[i]; const lines = td ? wrapRuns(meas, runsOf(td, {}, []), w - 2 * pad, cfs) : [];
+            lines.forEach((l) => { l.base = cfs; });
+            return { lines, h: lines.reduce((a, l) => a + Math.round(l.px * 1.4), 0) };
+          });
+          const h = Math.max(cfs * 1.4, ...cells.map((c) => c.h)) + 2 * pad;
+          blocks.push({ body: true, h, draw(ctx, y) {
+            let x = x0;
+            ctx.save(); ctx.strokeStyle = "#444"; ctx.lineWidth = Math.max(1, 0.25 * MM);
+            cells.forEach((c, i) => {
+              ctx.strokeRect(x, y, widths[i], h);
+              let yy = y + pad;
+              c.lines.forEach((l) => { drawRunLine(ctx, l, x + pad, yy + l.px * 1.05, widths[i] - 2 * pad, ""); yy += Math.round(l.px * 1.4); });
+              x += widths[i];
+            });
+            ctx.restore();
+          } });
+        });
+        gap(lh * 0.5);
+      }
+    }
+    return blocks;
+  }
+
   // ---------- fields ----------
   const fields = ["date", "ref", "subject", "greet", "body", "close"];
   const sliders = { mTop: ["oTop", " mm"], mBot: ["oBot", " mm"], mSide: ["oSide", " mm"], fSize: ["oSize", " pt"] };
@@ -1086,14 +1544,14 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   function tplButton(t) {
     const b = document.createElement("button"); b.type = "button"; b.className = "tpl";
     const tt = document.createElement("span"); tt.className = "tt"; tt.textContent = t.name;
-    const tp = document.createElement("span"); tp.className = "tp"; tp.textContent = t.subject || t.body.split("\n")[0];
+    const tp = document.createElement("span"); tp.className = "tp"; tp.textContent = t.subject || bodyText(t.body).split("\n")[0];
     b.append(tt, tp);
     let armed = false;
     b.addEventListener("click", () => {
       const typed = $("body").value.trim() || $("subject").value.trim();
       if (typed && !armed) {
         armed = true; b.classList.add("armed"); tp.textContent = "Tap again to use it. This replaces the letter you have typed.";
-        setTimeout(() => { armed = false; b.classList.remove("armed"); tp.textContent = t.subject || t.body.split("\n")[0]; }, 4000);
+        setTimeout(() => { armed = false; b.classList.remove("armed"); tp.textContent = t.subject || bodyText(t.body).split("\n")[0]; }, 4000);
         return;
       }
       useTemplate(t);
@@ -1118,16 +1576,18 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   function findBlanks() {
     const out = [];
-    for (const f of BLANK_FIELDS) for (const m of $(f).value.matchAll(/\[([^\]\n]{0,90})\]/g)) {
+    for (const f of BLANK_FIELDS) { const txt = f === "body" ? bodyText($(f).value) : $(f).value; for (const m of txt.matchAll(/\[([^\]\n]{0,90})\]/g)) {
       if (out.some((b) => b.label === m[1])) continue;
-      const before = $(f).value.slice(0, m.index).split(/\s+/).slice(-4).join(" ");
+      const before = txt.slice(0, m.index).split(/\s+/).slice(-4).join(" ");
       out.push({ label: m[1], ctx: before });
-    }
+    } }
     return out;
   }
   function fillBlank(label, value) {
-    const token = "[" + label + "]";
-    for (const f of BLANK_FIELDS) { const el = $(f); if (el.value.includes(token)) { el.value = el.value.split(token).join(value); store.set("f:" + f, el.value); } }
+    for (const f of BLANK_FIELDS) {
+      const rich = f === "body" && looksRich($(f).value), token = "[" + (rich ? escHtml(label).replace(/&quot;/g, '"') : label) + "]";
+      const el = $(f); if (el.value.includes(token)) { el.value = el.value.split(token).join(rich ? escHtml(value).replace(/&quot;/g, '"') : value); store.set("f:" + f, el.value); }
+    }
   }
   function fillPronouns(i) { for (const p of PRONOUNS) fillBlank(p.join("/"), p[i]); }
   function fmtTime(v) { const [h, m] = v.split(":").map(Number); return ((h % 12) || 12) + ":" + String(m).padStart(2, "0") + (h < 12 ? " a.m." : " p.m."); }
@@ -1352,8 +1812,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     if (subj) { meas.font = font(fs, true); const ls = wrap(meas, "Subject: " + subj, maxW); ls.forEach((ln, i) => blocks.push({ h: lh + (i === ls.length - 1 ? lh * 0.6 : 0), draw(ctx, y) { text(ctx, ln, m.side, y, true); } })); }
     const greet = $("greet").value.trim();
     if (greet) blocks.push({ h: lh * 1.6, draw(ctx, y) { text(ctx, greet, m.side, y); } });
-    meas.font = font(fs, false);
-    for (const ln of wrap(meas, val("body").replace(/\n{3,}/g, "\n\n").trim(), maxW)) blocks.push({ body: true, gap: !ln, h: ln ? lh : lh * 0.6, draw(ctx, y) { if (ln) text(ctx, ln, m.side, y); } });
+    for (const b of richBlocks(val("body"), m.side, maxW, fs, lh)) blocks.push(b);
     // Signature block: one column per signer, up to three per row, kept together on one page
     const sigH = 22 * MM, closeTxt = $("close").value.trim();
     const chosen = letterSigners();
@@ -1412,7 +1871,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
     return { pages, m, first };
   }
   async function fontsReady() {
-    try { await Promise.all(["Noto Serif|Aa", "Noto Serif Devanagari|अआ", "Noto Serif Gujarati|અઆ"].flatMap((s) => { const [f, t] = s.split("|"); return [document.fonts.load('400 30px "' + f + '"', t), document.fonts.load('700 30px "' + f + '"', t)]; })); } catch (e) {}
+    try { await Promise.all(["Noto Serif|Aa", "Noto Serif Devanagari|अआ", "Noto Serif Gujarati|અઆ"].concat(/face="Noto Sans/.test($("body").value) ? ["Noto Sans|Aa", "Noto Sans Devanagari|अआ", "Noto Sans Gujarati|અઆ"] : [], /face="EB Garamond/.test($("body").value) ? ["EB Garamond|Aa"] : []).flatMap((s) => { const [f, t] = s.split("|"); return ["400 ", "700 ", "italic 400 ", "italic 700 "].map((w) => document.fonts.load(w + '30px "' + f + '"', t)); })); } catch (e) {}
   }
   function paint(bg, screen) {
     const { pages, m, first } = layout(screen), out = [];
@@ -1440,7 +1899,7 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
   // ---------- checks before sending ----------
   function checks() {
     const warns = [];
-    const all = [$("subject").value, $("body").value, $("greet").value, $("close").value].join("\n");
+    const all = [$("subject").value, bodyText($("body").value), $("greet").value, $("close").value].join("\n");
     const blanks = Array.from(new Set(all.match(/\[[^\]\n]{0,60}\]/g) || []));
     if (blanks.length) warns.push("Parts in square brackets still need filling in: " + blanks.slice(0, 4).join(", ") + (blanks.length > 4 ? " and more" : "") + ".");
     const toHM = needsApproval(), sm = getSignMode(), staffSend = toHM && isStaff();
@@ -1534,7 +1993,10 @@ textarea.short { min-height: 90px; font-family: var(--f-body); }
         const area = $("printArea"); area.innerHTML = "";
         for (const c of paint("none")) { const im = new Image(); im.alt = ""; im.src = c.toDataURL("image/png"); area.appendChild(im); }
         await Promise.all(Array.from(area.images || area.querySelectorAll("img")).map((im) => im.decode ? im.decode().catch(() => {}) : null));
+        // A computer's "Save as PDF" names the file after the page title, so use the subject while printing.
+        const oldTitle = document.title; document.title = fileName().replace(/\.pdf$/, "");
         window.print();
+        setTimeout(() => { document.title = oldTitle; }, 1000);
         how = "Printed on letterhead paper";
         msg = "Sent to the printer. Load A4 letterhead paper and print at 100%.";
       } else {
